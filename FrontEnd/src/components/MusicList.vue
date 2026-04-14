@@ -1,0 +1,65 @@
+<script setup>
+import Song from './Song.vue';
+const props = defineProps({
+    name: String,
+    currentTrack: {
+        type: Object,
+        required: false,
+        default: null,
+    },
+});
+
+const emit = defineEmits(['song-play-state-change']);
+
+const handleSongPlayStateChange = (payload) => {
+    emit('song-play-state-change', payload);
+};
+
+const isSongPlaying = (song) => {
+    if (!props.currentTrack) return false;
+
+    return props.currentTrack.name === song.name
+        && props.currentTrack.artist === song.artist
+        && props.currentTrack.duration === song.duration
+        && props.currentTrack.cover === song.cover
+        && props.currentTrack.isPlaying;
+};
+
+//cover from https://covers.musichoarders.xyz/
+const songs = [
+    { name: 'Mirror', artist: 'Ado', duration: '3:45', cover: 'https://m.media-amazon.com/images/I/81yRZl5LtRL.jpg' },
+    { name: 'Glimpse of Us', artist: 'Joji', duration: '3:53', cover: 'https://m.media-amazon.com/images/I/81lqJcDPfZL.jpg' },
+    { name: 'As It Was', artist: 'Harry Styles', duration: '2:47', cover: 'https://m.media-amazon.com/images/I/61RyXmXm5fL.jpg' },
+    { name: 'Bad Habit', artist: 'Steve Lacy', duration: '3:52', cover: 'https://m.media-amazon.com/images/I/81gt2TIexbL.jpg' },
+    { name: 'Unholy', artist: 'Sam Smith, Kim Petras', duration: '2:36', cover: 'https://m.media-amazon.com/images/I/61aZhNW9Q0L.jpg' },
+    { name: 'Blinding Lights', artist: 'The Weeknd', duration: '3:20', cover: 'https://m.media-amazon.com/images/I/717Ypd1t7IL.jpg' },
+    { name: 'Heat Waves', artist: 'Glass Animals', duration: '3:58', cover: 'https://m.media-amazon.com/images/I/81vMxIyDZ9L.jpg' },
+    { name: 'Uptown Funk', artist: 'Mark Ronson ft. Bruno Mars', duration: '4:30', cover: 'https://m.media-amazon.com/images/I/71AZUM4CY1L.jpg' },
+    { name: 'Levitating', artist: 'Dua Lipa', duration: '3:23', cover: 'https://m.media-amazon.com/images/I/81dhBdiI4+L.jpg' },
+    { name: 'Peaches', artist: 'Justin Bieber ft. Daniel Caesar', duration: '3:18', cover: 'https://m.media-amazon.com/images/I/81lleqz5QXL.jpg' },
+    { name: 'Good 4 U', artist: 'Olivia Rodrigo', duration: '2:58', cover: 'https://m.media-amazon.com/images/I/61fin73zyhL.jpg' },
+    { name: 'Sunroof', artist: 'Nicky Youre', duration: '2:52', cover: 'https://m.media-amazon.com/images/I/71DdC823BZL.jpg' },
+    { name: 'Anti-Hero', artist: 'Taylor Swift', duration: '3:21', cover: 'https://m.media-amazon.com/images/I/81sD+kAZAFL.jpg' },
+    { name: 'Shape of You', artist: 'Ed Sheeran', duration: '3:53', cover: 'https://m.media-amazon.com/images/I/B1TlPSY5bKS.jpg' },
+    { name: 'Starboy', artist: 'The Weeknd ft. Daft Punk', duration: '3:50', cover: 'https://m.media-amazon.com/images/I/71fIuxvP+FL.jpg' },
+    { name: 'Kiss Me More', artist: 'Doja Cat ft. SZA', duration: '3:28', cover: 'https://m.media-amazon.com/images/I/71xVNFRJBsL.jpg' },
+];
+
+</script>
+<template>
+    <div class="trending-artiste bg-black rounded-4xl p-10 m-4 text-white">
+        <h2 class="text-left font-bold text-3xl">{{ name }}</h2>
+        <section class="m-5">
+            <Song 
+                v-for="(song, index) in songs" 
+                :key="index"
+                :name="song.name"
+                :artist="song.artist"
+                :duration="song.duration"
+                :cover="song.cover"
+                :is-playing-external="isSongPlaying(song)"
+                @play-state-change="handleSongPlayStateChange"
+            />
+        </section>
+    </div>
+</template>

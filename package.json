@@ -1,0 +1,21 @@
+{
+  "name": "phantomwaves",
+  "version": "1.0.0",
+  "description": "PhantomWaves is a web development project built with HTML, CSS, and JavaScript.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd Backend && node index.js",
+    "client": "cd FrontEnd && npm run dev -- --host 0.0.0.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "dependencies": {
+    "vue-router": "^5.0.4"
+  }
+}
