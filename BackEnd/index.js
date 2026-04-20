@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const PORT = 3000;
+const pool = require('./db');
 
 const TOKEN = 'WebProjectToken12345';
 
@@ -29,6 +30,15 @@ const sanitizeUser = (user) => ({
   role: user.role,
 });
 
+const USER_SELECT = `
+    SELECT idUser AS id,
+      nameUser AS name,
+      mailUser AS email,
+      passwordUser AS password,
+      IF(adminUser = 1, 'admin', 'user') AS role
+    FROM User
+    `;
+    
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -39,7 +49,7 @@ app.get('/api/data', (req, res) => {
   res.json({ message: "Hello from the Express backend!" });
 });
 
-const profileHandler = (req, res) => {
+const profileHandler =  async (req, res) => {
   const authHeader = req.headers.authorization || '';
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
 
@@ -47,50 +57,71 @@ const profileHandler = (req, res) => {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
-  const user = users[0];
+  try {
+    const [rows] = await pool.query(`${USER_SELECT} WHERE adminUser = 1 LIMIT 1`);
+    const user = rows[0];
+
+    if(!user){
+      return res.status(404).json({message: 'User not found'});
+    }
+  
 
   res.json({ user: sanitizeUser(user) });
-};
-
-const loginHandler = (req, res) => {
-  const { email, password } = req.body;
-
-  const user = users.find((entry) => entry.email === email && entry.password === password);
-
-  console.log("Login attempt:", email, password, "Found user:", !!user);
-  
-  if (!user) {
-    return res.status(401).json({ message: 'Invalid credentials' });
+  }catch(error){
+    console.error('Profile error:', error);
+    res.status(500).json({message: 'Server error'})
   }
-
-  res.json({ token: TOKEN, user: sanitizeUser(user) });
 };
 
-const registerHandler = (req, res) => {
+const loginHandler = async (req, res) => {
+  const { email, password } = req.body;
+try{
+  const [rows]=await pool.query(
+    `${USER_SELECT} where mailUser=? AND passwordUser = ?`, [email, password]
+  ); 
+  const user = rows[0];
+  console.log("Login attempt:",email, "Found user:", !!user);
+
+  if(!user){
+    return res.status(401).json({ message: 'Invalid credentials'})
+  }
+  res.json({token: TOKEN, user: sanitizeUser(user)});
+}catch(error){
+  console.error(`Login error: `, error)
+  res.status(500).json({message:'Server error'});
+}
+}
+
+const registerHandler = async (req, res) => {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
-
-  const alreadyExists = users.some((entry) => entry.email === email);
-
-  if (alreadyExists) {
-    return res.status(409).json({ message: 'User already exists' });
+try{
+  const [existing] = await pool.query(
+    'SELECT idUser FROM User WHERE mailUser = ?',
+    [email]
+  );
+  if(existing.length > 0){
+    return res.status(409).json({message: 'User already exists'});
   }
 
-  const newUser = {
-    id: users.length + 1,
-    name,
-    email,
-    password,
-    role: 'user',
-  };
+  const[result]= await pool.query(
+    'INSERT INTO user(nameUser, mailUser, passwordUser, adminUser) values (?,?,?,0)',
+    [name, email,password] 
+  );
 
-  users.push(newUser);
+  const [rows] = await pool.query(`${USER_SELECT} WHERE idUSer = ?`, [result.insertId]);
+  const newUser = rows[0];
 
-  res.status(201).json({ user: sanitizeUser(newUser) });
+  res.status(201).json({user: sanitizeUser(newUser)});
+} catch(error) {
+  console.error('Register error:', error);
+  res.status(500).json({message: 'Server error'});
 };
+
+}
 
 app.get(['/api/profile', '/profile'], profileHandler);
 app.post(['/api/login', '/login'], loginHandler);
