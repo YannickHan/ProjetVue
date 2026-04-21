@@ -42,6 +42,7 @@ const USER_SELECT = `
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use('/static', express.static('public'));
 
 
 // Routes
@@ -112,7 +113,7 @@ try{
     [name, email,password] 
   );
 
-  const [rows] = await pool.query(`${USER_SELECT} WHERE idUSer = ?`, [result.insertId]);
+  const [rows] = await pool.query(`${USER_SELECT} WHERE idUser = ?`, [result.insertId]);
   const newUser = rows[0];
 
   res.status(201).json({user: sanitizeUser(newUser)});
@@ -122,7 +123,30 @@ try{
 };
 
 }
+// Liste toutes les chansons avec leur artiste principal
+const getSongsHandler = async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT 
+        s.titleSong AS name,
+        a.nameArtist AS artist,
+        s.durationSong AS duration,
+        s.coverSong AS cover,
+        s.pathSong AS path
+      FROM Song s
+      JOIN ArtistHasSong ahs ON s.idSong = ahs.Song_idSong
+      JOIN Artist a ON a.idArtist = ahs.Artist_idArtist
+      ORDER BY s.idSong
+    `);
+    
+    res.json(rows);
+  } catch (error) {
+    console.error('GetSongs error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
 
+app.get('/api/songs', getSongsHandler);
 app.get(['/api/profile', '/profile'], profileHandler);
 app.post(['/api/login', '/login'], loginHandler);
 app.post(['/api/register', '/register'], registerHandler);

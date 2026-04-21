@@ -40,6 +40,7 @@ const currentTrack = ref({
     artist: '',
     cover: '',
     duration: '',
+    path: '',
 });
 
 const handleSongPlayStateChange = (payload) => {
@@ -83,6 +84,7 @@ onUnmounted(() => {
                     :track-artist="currentTrack.artist"
                     :track-duration="currentTrack.duration"
                     :track-cover="currentTrack.cover"
+                    :track-path="currentTrack.path"
                     @toggle-play="handleMediaPlayerTogglePlay"
                 />
             </div>
@@ -100,6 +102,7 @@ onUnmounted(() => {
                     :track-artist="currentTrack.artist"
                     :track-duration="currentTrack.duration"
                     :track-cover="currentTrack.cover"
+                    :track-path="currentTrack.path"
                     @toggle-play="handleMediaPlayerTogglePlay"
                 />
             </div>
@@ -116,6 +119,7 @@ onUnmounted(() => {
                     :track-artist="currentTrack.artist"
                     :track-duration="currentTrack.duration"
                     :track-cover="currentTrack.cover"
+                    :track-path="currentTrack.path"
                     @toggle-play="handleMediaPlayerTogglePlay"
                 />
             </div>
@@ -137,6 +141,7 @@ onUnmounted(() => {
                     :track-artist="currentTrack.artist"
                     :track-duration="currentTrack.duration"
                     :track-cover="currentTrack.cover"
+                    :track-path="currentTrack.path"
                     @toggle-play="handleMediaPlayerTogglePlay"
                 />
             </div>
@@ -148,6 +153,7 @@ onUnmounted(() => {
                     :track-artist="currentTrack.artist"
                     :track-duration="currentTrack.duration"
                     :track-cover="currentTrack.cover"
+                    :track-path="currentTrack.path"
                     @toggle-play="handleMediaPlayerTogglePlay"
                 />
             </div>

@@ -7,6 +7,7 @@ const props = defineProps({
   artist: String,
   duration: String,
   cover: String,
+  path: String,
   isPlayingExternal: {
     type: Boolean,
     default: false,
@@ -32,6 +33,7 @@ const togglePlay = () => {
     artist: props.artist,
     duration: props.duration,
     cover: props.cover,
+    path: props.path,
   })
 }
 

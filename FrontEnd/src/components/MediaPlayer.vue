@@ -24,13 +24,24 @@ const props = defineProps({
         type: String,
         default: '',
     },
+        trackPath: {
+        type: String,
+        default: '',
+    },
 });
 
+const API_URL = 'http://localhost:3000';
+
+const audioSrc = computed(() => {
+    if (!props.trackPath) return '';
+    return `${API_URL}/static/${props.trackPath}`;
+});
 const handleTogglePlay = () => {
     emit('toggle-play');
 };
 
 // ----------------------------This handle the timer for the progress bar----------------------------
+const audioRef = ref(null);
 const elapsedSeconds = ref(0);
 const intervalId = ref(null);
 
@@ -89,24 +100,28 @@ const startTimer = () => {
 watch(
     () => props.isPlaying,
     (playing) => {
-        if (!playing) {
-            stopTimer();
-            return;
-        }
+        if (!audioRef.value) return;
 
-        startTimer();
+        if (playing) {
+            audioRef.value.play();
+            startTimer();
+        } else {
+            audioRef.value.pause();
+            stopTimer();
+        }
     },
     { immediate: true }
 );
 
 // Réinitialiser le timer lorsque la piste change
 watch(
-    () => [props.trackName, props.trackArtist, props.trackDuration],
+    () => [props.trackName, props.trackArtist, props.trackPath],
     () => {
         stopTimer();
         elapsedSeconds.value = 0;
 
-        if (props.isPlaying) {
+        if (audioRef.value && props.isPlaying) {
+            audioRef.value.play();
             startTimer();
         }
     }
@@ -119,6 +134,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+    <audio ref="audioRef" :src="audioSrc" preload="metadata"></audio>
     <div class="sticky bottom-0 z-10 w-full h-24 pl-10 pr-10 bg-[#23a517] rounded-4xl">
         <div class="grid grid-cols-[0.05fr_0.25fr_0.4fr_0.25fr_0.05fr] gap-4 h-full">
             <img
