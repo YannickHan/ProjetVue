@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const PORT = 3000;
+const bcrypt = require('bcrypt');
 const pool = require('./db');
 
 const TOKEN = 'WebProjectToken12345';
@@ -78,14 +79,24 @@ const loginHandler = async (req, res) => {
   const { email, password } = req.body;
 try{
   const [rows]=await pool.query(
-    `${USER_SELECT} where mailUser=? AND passwordUser = ?`, [email, password]
+    `${USER_SELECT} where mailUser=?` ,
+    [email]
   ); 
-  const user = rows[0];
-  console.log("Login attempt:",email, "Found user:", !!user);
 
-  if(!user){
+  const user = rows[0];
+
+    if(!user){
     return res.status(401).json({ message: 'Invalid credentials'})
   }
+
+  const passwordMatch = await bcrypt.compare(password, user.password);
+
+  if (!passwordMatch) {
+  return res.status(401).json({ message: 'Invalid credentials' });
+  }
+
+  console.log("Login attempt:",email, "Found user:", !!user);
+
   res.json({token: TOKEN, user: sanitizeUser(user)});
 }catch(error){
   console.error(`Login error: `, error)
@@ -108,9 +119,11 @@ try{
     return res.status(409).json({message: 'User already exists'});
   }
 
+  const hashedPassword = await bcrypt.hash(password, 10);
+
   const[result]= await pool.query(
-    'INSERT INTO user(nameUser, mailUser, passwordUser, adminUser) values (?,?,?,0)',
-    [name, email,password] 
+    'INSERT INTO User(nameUser, mailUser, passwordUser, adminUser) values (?,?,?,0)',
+    [name, email, hashedPassword] 
   );
 
   const [rows] = await pool.query(`${USER_SELECT} WHERE idUser = ?`, [result.insertId]);
