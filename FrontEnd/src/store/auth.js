@@ -10,9 +10,28 @@ export const authState = reactive({
 export const login = async (email, password) => {
   const data = await authService.login(email, password);
 
-  authState.user = data.user;
+  authState.user = data.user || null;
   authState.token = data.token;
   authState.isAuthenticated = true;
+};
+
+export const initAuth = async () => {
+  if (!authState.token) {
+    return;
+  }
+
+  try {
+    await fetchProfile();
+  } catch {
+    logout();
+  }
+};
+
+export const fetchProfile = async () => {
+  const data = await authService.getProfile();
+  authState.user = data.user ?? data;
+  authState.isAuthenticated = true;
+  return authState.user;
 };
 
 export const logout = () => {

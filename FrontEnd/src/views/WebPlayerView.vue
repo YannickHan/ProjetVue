@@ -8,9 +8,14 @@ import Playlist from '../components/Playlist.vue';
 import TrendingArtiste from '../components/TrendingArtiste.vue';
 import MediaPlayer from '../components/MediaPlayer.vue';
 import SearchBar from '../components/SearchBar.vue';
+import SortFilter from '../components/SortFilter.vue';
 import ArtistProfile from '../components/ArtistProfile.vue';
 
+import defaultSongs from '../assets/songsData.json';
+
 const activeView = ref('music');
+const songs = ref(defaultSongs);
+
 
 // ----------------------------This handle the view----------------------------
 const title = computed(() => {
@@ -24,6 +29,9 @@ const handleChangeView = (view) => {
     activeView.value = view;
 };
 
+const scrollToTop = () => {
+    window.scrollTo({ top: 0 })
+};
 
 // ----------------------------This handle artist pages ---------------------------
 const selectedArtist = ref(null)
@@ -42,14 +50,63 @@ const currentTrack = ref({
     duration: '',
 });
 
+const currentSongIndex = ref(-1);
+
 const handleSongPlayStateChange = (payload) => {
     currentTrack.value = payload;
+    // Update current song index when a song is selected
+    const index = songs.value.findIndex(song => 
+        song.name === payload.name && 
+        song.artist === payload.artist &&
+        song.duration === payload.duration
+    );
+    if (index !== -1) {
+        currentSongIndex.value = index;
+    }
 };
 
 const handleMediaPlayerTogglePlay = () => {
     currentTrack.value = {
         ...currentTrack.value,
         isPlaying: !currentTrack.value.isPlaying,
+    };
+};
+
+const handleMediaPlayerNext = () => {
+    if (songs.value.length === 0) return;
+    
+    let nextIndex = currentSongIndex.value + 1;
+    if (nextIndex >= songs.value.length) {
+        nextIndex = 0; // Loop back to first song
+    }
+    
+    currentSongIndex.value = nextIndex;
+    const nextSong = songs.value[nextIndex];
+    currentTrack.value = {
+        isPlaying: true,
+        name: nextSong.name,
+        artist: nextSong.artist,
+        cover: nextSong.cover,
+        duration: nextSong.duration,
+    };
+};
+
+const handleMediaPlayerPrevious = () => {
+    if (songs.value.length === 0) return;
+    
+    let prevIndex = currentSongIndex.value - 1;
+    if (prevIndex < 0) {
+        prevIndex = songs.value.length - 1; // Loop back to last song
+    }
+    
+    currentSongIndex.value = prevIndex;
+    const prevSong = songs.value[prevIndex];
+    currentTrack.value = {
+        isPlaying: true,
+        name: prevSong.name,
+        artist: prevSong.artist,
+        cover: prevSong.cover,
+        duration: prevSong.duration,
     };
 };
 
@@ -72,6 +129,7 @@ onUnmounted(() => {
                 <TrendingArtiste one="Taylor Swift" two="Justin Bieber" three="Doja Cat" type="webplayer" @select-artist="handleSelectArtist"/>
                 <MusicList
                     name="Best of Today"
+                    :songs="songs"
                     :current-track="currentTrack"
                     @song-play-state-change="handleSongPlayStateChange"
                 />
@@ -84,13 +142,22 @@ onUnmounted(() => {
                     :track-duration="currentTrack.duration"
                     :track-cover="currentTrack.cover"
                     @toggle-play="handleMediaPlayerTogglePlay"
+                    @next-song="handleMediaPlayerNext"
+                    @prev-song="handleMediaPlayerPrevious"
                 />
             </div>
             <div v-else-if="activeView === 'search'" class="text-2xl font-bold">
-                <SearchBar/>
+                <div class="flex items-center gap-4 m-10">
+                    <div class="flex-1">
+                        <SearchBar />
+                    </div>
+                    <SortFilter @sort-change="handleSortChange" />
+                </div>
                 <MusicList
                     name="Recommandations"
+                    :songs="songs"
                     :current-track="currentTrack"
+                    type="admin"
                     @song-play-state-change="handleSongPlayStateChange"
                 />
                 <Footer class="pb-10" />
@@ -101,6 +168,8 @@ onUnmounted(() => {
                     :track-duration="currentTrack.duration"
                     :track-cover="currentTrack.cover"
                     @toggle-play="handleMediaPlayerTogglePlay"
+                    @next-song="handleMediaPlayerNext"
+                    @prev-song="handleMediaPlayerPrevious"
                 />
             </div>
             <div v-else-if="activeView === 'likes'" class="text-2xl font-bold">
@@ -117,6 +186,8 @@ onUnmounted(() => {
                     :track-duration="currentTrack.duration"
                     :track-cover="currentTrack.cover"
                     @toggle-play="handleMediaPlayerTogglePlay"
+                    @next-song="handleMediaPlayerNext"
+                    @prev-song="handleMediaPlayerPrevious"
                 />
             </div>
             <div v-else-if="activeView === 'artist'" class="text-2xl font-bold">
@@ -149,6 +220,8 @@ onUnmounted(() => {
                     :track-duration="currentTrack.duration"
                     :track-cover="currentTrack.cover"
                     @toggle-play="handleMediaPlayerTogglePlay"
+                    @next-song="handleMediaPlayerNext"
+                    @prev-song="handleMediaPlayerPrevious"
                 />
             </div>
         </div>

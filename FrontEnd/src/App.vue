@@ -1,15 +1,20 @@
 <script setup>
 import NavBar from './components/NavBar.vue'
 import Footer from './components/Footer.vue'
+import { useRoute } from 'vue-router'
 
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
+import { initAuth } from './store/auth'
 
-const message = ref('Loading...')
+const route = useRoute()
+
+const showFooter = () => {
+  const hiddenRoutes = ['music', 'admin']
+  return !hiddenRoutes.includes(route.name)
+}
 
 onMounted(async () => {
-  const response = await fetch('/api/data')
-  const data = await response.json()
-  message.value = data.message
+  await initAuth()
 })
 </script>
 
@@ -18,5 +23,5 @@ onMounted(async () => {
   <main class="pt-15">
     <RouterView />
   </main>
-  <Footer />
+  <Footer v-if="showFooter()" />
 </template> 

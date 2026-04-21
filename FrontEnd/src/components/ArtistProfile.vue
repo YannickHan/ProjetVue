@@ -1,15 +1,17 @@
 <script setup>
 import MusicList from './MusicList.vue';
 import Playlist from './Playlist.vue';
-import Song from './Song.vue';
+import SongsData from '../assets/songsData.json';
+import { ref } from 'vue';
 
 const props = defineProps({
     name: String,
     bgCover: String,
     nbFollowers: Number
 });   
-import { ref } from 'vue'
+
 const isFollowing = ref(false)
+const songs = ref(SongsData);
 </script>
 
 <template>
@@ -42,6 +44,7 @@ const isFollowing = ref(false)
         </div>
         <MusicList
             name="Top Tracks"
+            :songs="songs"
             :current-track="currentTrack"
             @song-play-state-change="handleSongPlayStateChange"
         />
