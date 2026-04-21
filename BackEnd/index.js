@@ -7,23 +7,6 @@ const pool = require('./db');
 
 const TOKEN = 'WebProjectToken12345';
 
-const users = [
-  {
-    id: 1,
-    name: 'Admin',
-    email: 'admin@phantomwaves.com',
-    password: 'admin',
-    role: 'admin',
-  },
-  {
-    id: 2,
-    name: 'User',
-    email: 'user@user.com',
-    password: 'user',
-    role: 'user',
-  },
-];
-
 const sanitizeUser = (user) => ({
   id: user.id,
   name: user.name,
