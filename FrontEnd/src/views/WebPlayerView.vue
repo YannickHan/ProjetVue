@@ -8,7 +8,7 @@ import Playlist from '../components/Playlist.vue';
 import TrendingArtiste from '../components/TrendingArtiste.vue';
 import MediaPlayer from '../components/MediaPlayer.vue';
 import SearchBar from '../components/SearchBar.vue';
-import SortFilter from '../components/SortFilter.vue';
+import Sort from '../components/Sort.vue';
 import ArtistProfile from '../components/ArtistProfile.vue';
 
 import defaultSongs from '../assets/songsData.json';
@@ -151,7 +151,6 @@ onUnmounted(() => {
                     <div class="flex-1">
                         <SearchBar />
                     </div>
-                    <SortFilter @sort-change="handleSortChange" />
                 </div>
                 <MusicList
                     name="Recommandations"
