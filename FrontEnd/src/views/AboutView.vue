@@ -64,7 +64,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* ------ SCROLLING ANIMATIONS IN HEADER ------ */
+/* ------ This handle scrolling animations in header ------ */
 
 @keyframes marquee {
   0% { transform: translateX(0%); }
@@ -84,7 +84,7 @@ onMounted(() => {
   animation: marquee-reverse 25s linear infinite;
 }
 
-/* ------ SCROLLING EFFECT FOR ABOUT SECTION ------ */
+/* ------ This handle scrolling effect for about section ------ */
 
 .band::before {
   content: "";
@@ -112,7 +112,7 @@ onMounted(() => {
 }
 
 
-/* ------ HEARTBEAT BACKGROUND ------ */
+/* ------ This handle heartbeat background ------ */
 
 .m-6::before,
 .m-6::after {
