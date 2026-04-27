@@ -10,12 +10,7 @@ const props = defineProps({
         type: Object,
         required: false,
         default: null,
-    },
-    type: {
-        type: String,
-        default: 'default',
-        required: false,
-    },
+    }
 });
 
 const emit = defineEmits(['song-play-state-change']);
