@@ -184,14 +184,6 @@ onUnmounted(() => {
                     :nb-followers="0"
                 />
                 <Footer class="pb-10" />
-                <MediaPlayer
-                    :is-playing="currentTrack.isPlaying"
-                    :track-name="currentTrack.name"
-                    :track-artist="currentTrack.artist"
-                    :track-duration="currentTrack.duration"
-                    :track-cover="currentTrack.cover"
-                    @toggle-play="handleMediaPlayerTogglePlay"
-                />
             </div>
             <div v-else class="text-2xl font-bold">
                 <Quiz :current-track="currentTrack" @play-song="handleSongPlayStateChange" />
