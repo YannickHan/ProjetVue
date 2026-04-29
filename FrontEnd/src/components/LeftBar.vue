@@ -16,7 +16,7 @@ const selectView = (view) => {
 </script>
 
 <template>
-    <div class="bg-black rounded-4xl p-10 m-4 text-white h-[53rem] flex flex-col justify-start overflow-y-auto">
+    <div class="bg-black rounded-4xl p-10 text-white flex flex-col justify-start overflow-y-auto">
         <h1 class="text-3xl font-bold mb-4">Welcome to Phantom Waves</h1>
                 <button
                     :class="['p-2 pl-10 rounded-lg cursor-pointer font-bold text-left text-lg', activeView === 'music' ? 'bg-gray-600' : 'hover:bg-gray-600']"

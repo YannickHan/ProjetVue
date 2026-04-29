@@ -11,6 +11,7 @@ import MediaPlayer from '../components/MediaPlayer.vue';
 import SearchBar from '../components/SearchBar.vue';
 import Sort from '../components/Sort.vue';
 import ArtistProfile from '../components/ArtistProfile.vue';
+import Quiz from '../components/Quiz.vue';
 import defaultSongs from '../assets/songsData.json';
 
 const route = useRoute()
@@ -138,9 +139,9 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div class="grid grid-cols-[0.3fr_1fr]">
+    <div class="grid grid-cols-[0.2fr_0.8fr] h-screen w-screen p-4 gap-4">
         <LeftBar :active-view="activeView" @change-view="handleChangeView" />
-        <div class="bg-black rounded-4xl m-4 text-white h-[53rem] flex flex-col overflow-y-auto">
+        <div class="bg-black text-white h-full w-full flex flex-col overflow-y-auto rounded-4xl">
             <div v-if="activeView === 'music'" class="text-2xl font-bold">
                 <banner />
                 <TrendingArtiste one="Taylor Swift" two="Justin Bieber" three="Doja Cat" type="webplayer" @select-artist="handleSelectArtist"/>
@@ -151,17 +152,7 @@ onUnmounted(() => {
                     @song-play-state-change="handleSongPlayStateChange"
                 />
                 <Playlist name="Best Playlist of Today"/>
-                <Footer class="pb-10" />
-                <MediaPlayer
-                    :is-playing="currentTrack.isPlaying"
-                    :track-name="currentTrack.name"
-                    :track-artist="currentTrack.artist"
-                    :track-duration="currentTrack.duration"
-                    :track-cover="currentTrack.cover"
-                    @toggle-play="handleMediaPlayerTogglePlay"
-                    @next-song="handleMediaPlayerNext"
-                    @prev-song="handleMediaPlayerPrevious"
-                />
+                <Footer class="pb-50" />
             </div>
             <div v-else-if="activeView === 'search'" class="text-2xl font-bold">
                 <div class="flex items-center gap-4 m-10">
@@ -176,17 +167,7 @@ onUnmounted(() => {
                     type="admin"
                     @song-play-state-change="handleSongPlayStateChange"
                 />
-                <Footer class="pb-10" />
-                <MediaPlayer
-                    :is-playing="currentTrack.isPlaying"
-                    :track-name="currentTrack.name"
-                    :track-artist="currentTrack.artist"
-                    :track-duration="currentTrack.duration"
-                    :track-cover="currentTrack.cover"
-                    @toggle-play="handleMediaPlayerTogglePlay"
-                    @next-song="handleMediaPlayerNext"
-                    @prev-song="handleMediaPlayerPrevious"
-                />
+                <Footer class="pb-50" />
             </div>
             <div v-else-if="activeView === 'likes'" class="text-2xl font-bold">
                 <!-- <MusicList
@@ -194,17 +175,7 @@ onUnmounted(() => {
                     :current-track="currentTrack"
                     @song-play-state-change="handleSongPlayStateChange"
                 /> -->
-                <Footer class="pb-10" />
-                <MediaPlayer
-                    :is-playing="currentTrack.isPlaying"
-                    :track-name="currentTrack.name"
-                    :track-artist="currentTrack.artist"
-                    :track-duration="currentTrack.duration"
-                    :track-cover="currentTrack.cover"
-                    @toggle-play="handleMediaPlayerTogglePlay"
-                    @next-song="handleMediaPlayerNext"
-                    @prev-song="handleMediaPlayerPrevious"
-                />
+                <Footer class="pb-50" />
             </div>
             <div v-else-if="activeView === 'artist' && selectedArtist" class="text-2xl font-bold">
                 <ArtistProfile
@@ -223,18 +194,19 @@ onUnmounted(() => {
                 />
             </div>
             <div v-else class="text-2xl font-bold">
-                <Footer class="pb-10" />
-                <MediaPlayer
-                    :is-playing="currentTrack.isPlaying"
-                    :track-name="currentTrack.name"
-                    :track-artist="currentTrack.artist"
-                    :track-duration="currentTrack.duration"
-                    :track-cover="currentTrack.cover"
-                    @toggle-play="handleMediaPlayerTogglePlay"
-                    @next-song="handleMediaPlayerNext"
-                    @prev-song="handleMediaPlayerPrevious"
-                />
+                <Quiz :current-track="currentTrack" @play-song="handleSongPlayStateChange" />
+                <Footer class="pb-50" />
             </div>
         </div>
     </div>
+    <MediaPlayer
+        :is-playing="currentTrack.isPlaying"
+        :track-name="currentTrack.name"
+        :track-artist="currentTrack.artist"
+        :track-duration="currentTrack.duration"
+        :track-cover="currentTrack.cover"
+        @toggle-play="handleMediaPlayerTogglePlay"
+        @next-song="handleMediaPlayerNext"
+        @prev-song="handleMediaPlayerPrevious"
+    />
 </template>
