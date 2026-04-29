@@ -7,12 +7,11 @@ import AddButton from '../components/AddButton.vue';
 import SearchBar from '../components/SearchBar.vue';
 import MusicList from '../components/MusicList.vue';
 import AdminDashboard from '../components/AdminDashboard.vue';
+import ArtistList from '../components/ArtistList.vue';
 import SongsData from '../assets/songsData.json';
 import Footer from '../components/Footer.vue';
 import { logout } from "../store/auth";
-import { useRouter } from "vue-router";
 
-const router = useRouter();
 const songs = ref(SongsData);
 
 const handleLogout = () => {
@@ -102,11 +101,13 @@ const processedSongs = computed(() => {
                   </div>
               </div>
               <div class="flex m-5">
-                <div :class="hasFilters ? 'w-41' : 'w-30'" class="relative">
+                <div :class="hasFilters ? 'w-34' : 'w-25'" class="relative">
                   <Filter @update:filters="handleFilters" />
                 </div>
-                <Sort @sort-change="handleSortChange" />
-                <AddButton />
+                <Sort @sort-change="handleSortChange" type="songCatalog" />
+                <div class="ml-auto">
+                  <AddButton type="songCatalog"/>
+                </div>
               </div>
               <MusicList 
                     name="Song Catalog"
@@ -118,7 +119,7 @@ const processedSongs = computed(() => {
               <Footer class="pb-10" />
             </div>
             <div v-else="activeView === 'artistList'" class="text-2xl font-bold">
-              
+                <ArtistList />
               <Footer class="pb-10"/>
             </div>
         </div>

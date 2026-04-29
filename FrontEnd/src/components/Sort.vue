@@ -1,6 +1,13 @@
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
 
+const props = defineProps({
+  type: {
+    type: String,
+    required: true,
+  },
+})
+
 const emit = defineEmits(['sort-change']);
 
 const dropdownRef = ref(null);
@@ -8,7 +15,6 @@ const isOpen = ref(false);
 
 const sortBy = ref('name');
 const order = ref('asc');
-
 // ------------------ This handle the sorting ------------------
 const emitSort = () => {
   emit('sort-change', {
@@ -54,17 +60,30 @@ onBeforeUnmount(() => {
     </button>
 
     <transition name="fade">
-      <div v-if="isOpen" class="absolute left-0 mt-3 w-56 text-white p-4 rounded-2xl border border-green-500 bg-black/80 z-50">
-        <div class="mb-4">
-          <label class="text-sm text-green-500">Sort by</label>
-          <select v-model="sortBy" class="w-full mt-1 p-3 rounded-lg border border-white text-white text-base cursor-pointer focus:ring-2 focus:ring-green-500 focus:border-transparent bg-black/60">
-            <option value="name">Title</option>
-            <option value="artist">Artist</option>
-          </select>
+      <div v-if="isOpen" :class="[
+        'absolute mt-3 w-56 text-white p-4 rounded-2xl border border-green-500 bg-black/80 z-50',
+        props.type === 'songCatalog' ? 'left-0' : '',
+        props.type === 'artistList' ? 'right-0' : ''
+      ]"> 
+        <div v-if="props.type === 'songCatalog'">
+          <div class="mb-4">
+            <label class="text-sm text-green-500">Sort by</label>
+            <select v-model="sortBy" class="text-lg w-full mt-1 p-3 rounded-lg border border-white bg-black/60">
+              <option value="name">Title</option>
+              <option value="artist">Artist</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm text-green-500">Order</label>
+            <select v-model="order" class="text-lg w-full mt-1 p-3 rounded-lg border border-white bg-black/60">
+              <option value="asc">A → Z</option>
+              <option value="desc">Z → A</option>
+            </select>
+          </div>
         </div>
-        <div>
+        <div v-else-if="props.type === 'artistList'">
           <label class="text-sm text-green-500">Order</label>
-          <select v-model="order" class="w-full mt-1 p-3 rounded-lg border border-white text-white text-base cursor-pointer focus:ring-2 focus:ring-green-500 focus:border-transparent bg-black/60">
+          <select v-model="order" class="text-lg w-full mt-1 p-3 rounded-lg border border-white bg-black/60">
             <option value="asc">A → Z</option>
             <option value="desc">Z → A</option>
           </select>

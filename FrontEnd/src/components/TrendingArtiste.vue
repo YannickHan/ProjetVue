@@ -1,8 +1,9 @@
 <script setup>
 import { useRouter } from "vue-router";
+import { authState } from "../store/auth";
 
 const router = useRouter();
-defineProps(['one', 'two', 'three', 'type'])
+const props = defineProps(['one', 'two', 'three', 'type']);
 
 const backgroundImages = {
     "Taylor Swift": "https://i.pinimg.com/736x/5e/dc/bd/5edcbdc406d790deefc554e5703879b7.jpg",
@@ -38,19 +39,28 @@ const handleHorizontalWheel = (e) => {
 };
 
 const handleClick = (artist) => {
-    window.scrollTo(0, 0);
-    router.push("/webplayer");
-    emit('select-artist', { activeView: 'artiste' });
+  const payload = {
+    view: 'artist',
+    name: artist,
+    image: backgroundImages[artist]
+  };
+
+  if (props.type === 'default' && !authState?.isAuthenticated) {
+    localStorage.setItem('pendingRedirect', JSON.stringify(payload));
+    router.push('/login');
+    return;
+  }
+
+  router.push({
+    path: "/webplayer",
+    query: payload
+  });
 };
 
-const emit = defineEmits(['select-artist'])
-function selectArtist(payload) {
-  emit('select-artist', payload)
-}
 </script>
 
 <template>
-    <div v-if="type === 'default'" class="trending-artiste bg-black rounded-4xl p-10 m-4 text-white">
+    <div v-if="props.type === 'default'" class="trending-artiste bg-black rounded-4xl p-10 m-4 text-white">
         <h2 class="text-center font-bold text-9xl m-10 mb-20">Trending Artists</h2>
         <section class="grid grid-cols-3 gap-6 mt-4 text-center text-lg">
             <div @click="handleClick(two)" class="h-[65rem] bg-[#1a1a1a] rounded-4xl p-4 bg-cover bg-center hover:scale-105 transition-transform duration-300 cursor-pointer self-end" :style="{ backgroundImage: `url(${backgroundImages[two]})` }">
@@ -65,11 +75,11 @@ function selectArtist(payload) {
         </section>
     </div>
 
-    <div v-else-if="type === 'webplayer'" class="trending-artiste bg-black rounded-4xl p-10 m-4 text-white">
+    <div v-else-if="props.type === 'webplayer'" class="trending-artiste bg-black rounded-4xl p-10 m-4 text-white">
     <h2 class="text-left font-bold text-3xl">Trending Artists</h2>
         <section class="flex overflow-x-auto gap-6 mt-4 text-center text-lg pb-4" @wheel="handleHorizontalWheel">
             <div v-for="(image, artist) in getShuffledArtists()" :key="artist"
-                @click="selectArtist({ artist, image })"
+                @click="handleClick(artist)"
                 class="h-72 w-56 flex-shrink-0 bg-[#1a1a1a] rounded-4xl p-4 bg-cover bg-center bg-no-repeat hover:scale-105 transition-transform duration-300 cursor-pointer flex flex-col justify-end" :style="{ backgroundImage: `url(${image})`, backgroundPosition: 'center' }">
                 <h3 class="font-bold text-2xl m-5">{{ artist }}</h3>
             </div>
