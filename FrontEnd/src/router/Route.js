@@ -12,9 +12,10 @@ const routes = [
   { path: '/about', name: 'about', component: About },
   { path: '/support', name: 'support', component: Support },
   { path: '/login', name: 'login', component: Login },
-  { path: '/admin', name: 'admin', component: Admin, meta: { requiresAuth: true } },
-  { path: '/webplayer', name: 'music', component: WebPlayer, meta: { requiresAuth: true } },
-  // { path: '/webplayer', name: 'music', component: WebPlayer },
+  // { path: '/admin', name: 'admin', component: Admin, meta: { requiresAuth: true } },
+  // { path: '/webplayer', name: 'music', component: WebPlayer, meta: { requiresAuth: true } },
+  { path: '/webplayer', name: 'music', component: WebPlayer },
+  { path: '/admin', name: 'admin', component: Admin},
 ]
 
 const router = createRouter({
