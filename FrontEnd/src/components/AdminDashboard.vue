@@ -143,6 +143,8 @@ const openPanel = (req) => {
   selectedPanel.value = req
   editing.value = false
   editForm.value.adminNote = req.adminNote || ''
+  originalStatus.value = req.status
+  statusChanged.value = false
 }
 
 const closePanel = () => {
@@ -151,12 +153,16 @@ const closePanel = () => {
 }
 
 // ----------------------------This handle the modifications ----------------------------
+const statusChanged = ref(false)
+const originalStatus = ref(null)
+
 const updateStatus = (status) => {
   if (!selectedPanel.value) return
   const index = requests.value.findIndex(r => r.id === selectedPanel.value.id)
   if (index === -1) return
   requests.value[index].status = status
   selectedPanel.value.status = status
+  statusChanged.value = status !== originalStatus.value
 }
 
 const saveEdit = () => {
@@ -166,6 +172,8 @@ const saveEdit = () => {
   requests.value[index].adminNote = editForm.value.adminNote
   selectedPanel.value.adminNote = editForm.value.adminNote
   editing.value = false
+  statusChanged.value = false
+  originalStatus.value = selectedPanel.value.status
 }
 </script>
 
@@ -234,15 +242,14 @@ const saveEdit = () => {
       </div>
       <div class="mt-4 p-4 rounded-xl bg-white/5 border border-white/5 text-sm text-white"> {{ selectedPanel.description }} </div>
       <div class="mt-4">
-        <textarea v-if="editing" v-model="editForm.adminNote" class="w-full h-40 p-3 bg-white/10 rounded-lg border border-white/5 text-sm"/>
+        <textarea v-if="editing" v-model="editForm.adminNote" class="w-full h-40 p-3 bg-white/10 rounded-lg border border-white/5 text-sm"></textarea>
         <p v-else class="text-sm text-green-500"> {{ selectedPanel.adminNote || 'No admin note' }} </p>
       </div>
       <div class="flex justify-end gap-2 mt-4">
         <button class="px-3 py-1 text-xs bg-white/10 border border-white/10 rounded-xl hover:bg-white/20 cursor-pointer" @click="editing = !editing">
           {{ editing ? 'Cancel' : 'Edit note' }}
         </button>
-        <button v-if="editing" class="px-3 py-1 text-xs bg-green-500/80 hover:bg-green-500 rounded-xl" @click="saveEdit"> Save </button>
-        <button class="px-3 py-1 text-xs bg-green-500/80 hover:bg-green-500 rounded-xl" @click="saveEdit"> Save </button>
+        <button v-if="editing || statusChanged" class="px-3 py-1 text-xs bg-green-500/80 hover:bg-green-500 rounded-xl" @click="saveEdit"> Save </button>
       </div>
     </div>
   </div>

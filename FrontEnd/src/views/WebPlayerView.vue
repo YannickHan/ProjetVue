@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router'
 import LeftBar from '../components/LeftBar.vue';
 import MusicList from '../components/MusicList.vue';
 import banner from '../components/banner.vue';
@@ -11,12 +12,12 @@ import SearchBar from '../components/SearchBar.vue';
 import Sort from '../components/Sort.vue';
 import ArtistProfile from '../components/ArtistProfile.vue';
 import Quiz from '../components/Quiz.vue';
-
 import defaultSongs from '../assets/songsData.json';
 
-const activeView = ref('music');
+const route = useRoute()
+const router = useRouter()
+const activeView = computed(() => route.query.view || 'music')
 const songs = ref(defaultSongs);
-
 
 // ----------------------------This handle the view----------------------------
 const title = computed(() => {
@@ -27,19 +28,35 @@ const title = computed(() => {
 });
 
 const handleChangeView = (view) => {
-    activeView.value = view;
-};
-
+  router.push({
+    path: '/webplayer',
+    query: {
+      view
+    }
+  })
+}
 const scrollToTop = () => {
     window.scrollTo({ top: 0 })
 };
 
 // ----------------------------This handle artist pages ---------------------------
-const selectedArtist = ref(null)
+const selectedArtist = computed(() => {
+  if (!route.query.name) return null;
+  return {
+    artist: route.query.name,
+    image: route.query.image || ''
+  };
+});
 
 const handleSelectArtist = ({ artist, image }) => {
-  selectedArtist.value = { artist, image }
-  activeView.value = 'artist'
+  router.push({
+    path: '/webplayer',
+    query: {
+      view: 'artist',
+      name: artist,
+      image: image
+    }
+  })
 }
 
 // ----------------------------This handle the mediaplayer state----------------------------
@@ -160,18 +177,13 @@ onUnmounted(() => {
                 /> -->
                 <Footer class="pb-50" />
             </div>
-            <div v-else-if="activeView === 'artist'" class="text-2xl font-bold">
+            <div v-else-if="activeView === 'artist' && selectedArtist" class="text-2xl font-bold">
                 <ArtistProfile
                     :name="selectedArtist.artist"
                     :bg-cover="selectedArtist.image"
                     :nb-followers="0"
                 />
-                <MusicList
-                    name="Discography"
-                    :current-track="currentTrack"
-                    @song-play-state-change="handleSongPlayStateChange"
-                />
-                <Footer class="pb-50" />
+                <Footer class="pb-10" />
                 <MediaPlayer
                     :is-playing="currentTrack.isPlaying"
                     :track-name="currentTrack.name"

@@ -70,13 +70,13 @@ onBeforeUnmount(() => {
 <template>
   <div ref="dropdownRef" class="relative w-fit">
     <button @click="isOpen = !isOpen"
-      class="text-white px-4 py-2 rounded-full border transition flex items-center gap-2 hover:scale-[1.02] cursor-pointer"
+      class="text-lg text-white px-4 py-2 rounded-full border transition flex items-center gap-2 hover:scale-[1.02] cursor-pointer"
       :class="hasActiveFilters
         ? 'bg-green-500 border-green-500'
         : 'bg-transparent border-white'"
     >
       Filters
-      <span v-if="hasActiveFilters" class="ml-1 text-base bg-black/10 px-3 py-0.5 rounded-full">
+      <span v-if="hasActiveFilters" class="ml-1 text-xs bg-black/10 px-2 py-0.5 rounded-full">
         {{ filters.artists.length }}
       </span>
     </button>
@@ -92,19 +92,17 @@ onBeforeUnmount(() => {
 
     <transition name="fade">
       <div v-if="isOpen" class="absolute left-0 mt-3 w-[44.5em] bg-black/80 border border-green-500 rounded-2xl p-4 z-50">
-        <div>
-          <p class="font-bold text-green-500 text-sm mb-3">Artists</p>
-          <div class="flex flex-wrap gap-2">
-            <label v-for="a in artists":key="a"
-              class="cursor-pointer px-3 py-1 border rounded-full text-sm hover:bg-white hover:text-black hover:border-none"
-              :class="filters.artists.includes(a)
-                ? 'bg-green-500 text-white border-none'
-                : 'border-gray-600 text-white'"
+        <p class="font-bold text-green-500 text-sm mb-3">Artists</p>
+        <div class="flex flex-wrap gap-2">
+          <label v-for="a in artists":key="a"
+            class="cursor-pointer px-3 py-1 border rounded-full text-sm hover:bg-white hover:text-black hover:border-none"
+            :class="filters.artists.includes(a)
+              ? 'bg-green-500 text-white border-none'
+              : 'border-gray-600 text-white'"
             >
-              <input type="checkbox" class="hidden" :checked="filters.artists.includes(a)" @change="toggleArtist(a)"/> 
-              {{ a }}
-            </label>
-          </div>
+            <input type="checkbox" class="hidden" :checked="filters.artists.includes(a)" @change="toggleArtist(a)"/> 
+            {{ a }}
+          </label>
         </div>
       </div>
     </transition>

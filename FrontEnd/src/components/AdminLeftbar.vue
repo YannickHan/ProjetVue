@@ -26,7 +26,7 @@ const selectView = (view) => {
                 :class="['p-2 pl-10 rounded-lg cursor-pointer font-bold text-left text-lg', activeView === 'musicList' ? 'bg-gray-600' : 'hover:bg-gray-600']"
                 @click="selectView('musicList')"
             >
-                Music List
+                Song Catalog
             </button>
             <button
                 :class="['p-2 pl-10 rounded-lg cursor-pointer font-bold text-left text-lg', activeView === 'artistList' ? 'bg-gray-600' : 'hover:bg-gray-600']"

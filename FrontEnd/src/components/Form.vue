@@ -12,7 +12,16 @@ const router = useRouter();
 const handleLogin = async () => {
   try {
     await login(email.value, password.value);
-    router.push("/webplayer");
+    const pending = JSON.parse(localStorage.getItem('pendingRedirect'));
+    if (pending) {
+      localStorage.removeItem('pendingRedirect');
+      router.push({
+        path: "/webplayer",
+        query: pending
+      });
+    } else {
+      router.push("/webplayer");
+    }
   } catch (e) {
     alert(e.message || "Login failed");
   }
