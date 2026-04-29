@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 
-const emit = defineEmits(['toggle-play']);
+const emit = defineEmits(['toggle-play', 'next-song', 'prev-song']);
 
 const props = defineProps({
     isPlaying: {
@@ -24,24 +24,21 @@ const props = defineProps({
         type: String,
         default: '',
     },
-        trackPath: {
-        type: String,
-        default: '',
-    },
 });
 
-const API_URL = 'http://localhost:3000';
-
-const audioSrc = computed(() => {
-    if (!props.trackPath) return '';
-    return `${API_URL}/static/${props.trackPath}`;
-});
 const handleTogglePlay = () => {
     emit('toggle-play');
 };
 
+const handleNextSong = () => {
+    emit('next-song');
+};
+
+const handlePrevSong = () => {
+    emit('prev-song');
+};
+
 // ----------------------------This handle the timer for the progress bar----------------------------
-const audioRef = ref(null);
 const elapsedSeconds = ref(0);
 const intervalId = ref(null);
 
@@ -100,28 +97,24 @@ const startTimer = () => {
 watch(
     () => props.isPlaying,
     (playing) => {
-        if (!audioRef.value) return;
-
-        if (playing) {
-            audioRef.value.play();
-            startTimer();
-        } else {
-            audioRef.value.pause();
+        if (!playing) {
             stopTimer();
+            return;
         }
+
+        startTimer();
     },
     { immediate: true }
 );
 
 // Réinitialiser le timer lorsque la piste change
 watch(
-    () => [props.trackName, props.trackArtist, props.trackPath],
+    () => [props.trackName, props.trackArtist, props.trackDuration],
     () => {
         stopTimer();
         elapsedSeconds.value = 0;
 
-        if (audioRef.value && props.isPlaying) {
-            audioRef.value.play();
+        if (props.isPlaying) {
             startTimer();
         }
     }
@@ -134,13 +127,12 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <audio ref="audioRef" :src="audioSrc" preload="metadata"></audio>
-    <div class="sticky bottom-0 z-10 w-full h-24 pl-10 pr-10 bg-[#23a517] rounded-4xl">
-        <div class="grid grid-cols-[0.05fr_0.25fr_0.4fr_0.25fr_0.05fr] gap-4 h-full">
+    <div class="fixed bottom-0 z-10 w-full h-24 pl-10 pr-10 bg-[#23a517]">
+        <div class="grid grid-cols-7 gap-4 h-full">
             <img
                 :src="trackCover || '/Logo3.png'"
                 alt="Track cover"
-                class="w-16 h-16 object-cover rounded-md border mx-auto my-auto"
+                class="w-16 h-16 object-cover rounded-md border mx-auto my-auto hover:scale-115 transition-transform duration-300"
             />
             <div class="flex flex-col justify-center">
                 <p class="text-xl font-bold">{{ trackName || 'No track selected' }}</p>
@@ -148,11 +140,27 @@ onBeforeUnmount(() => {
             </div>
             <button
                 type="button"
-                class="text-3xl cursor-pointer self-right rounded-4xl m-4 border-3 border-[#1a1a1a] hover:scale-105 transition-transform duration-300"
+                class="text-2xl cursor-pointer self-center rounded-lg hover:scale-115 transition-transform duration-300"
+                :aria-label="'Previous track'"
+                @click="handlePrevSong"
+            >
+                ⏮
+            </button>
+            <button
+                type="button"
+                class="text-3xl cursor-pointer self-center rounded-4xl hover:scale-115 transition-transform duration-300"
                 :aria-label="isPlaying ? 'Pause track' : 'Play track'"
                 @click="handleTogglePlay"
             >
                 {{ isPlaying ? '⏸' : '▶' }}
+            </button>
+            <button
+                type="button"
+                class="text-2xl cursor-pointer self-center rounded-lg hover:scale-115 transition-transform duration-300"
+                :aria-label="'Next track'"
+                @click="handleNextSong"
+            >
+                ⏭
             </button>
             <P></P>
             <p class="text-sm font-semibold opacity-90 self-center">{{ displayedElapsed }} / {{ trackDuration || '0:00' }}</p>
