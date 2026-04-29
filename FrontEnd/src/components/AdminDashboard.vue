@@ -242,6 +242,7 @@ const saveEdit = () => {
           {{ editing ? 'Cancel' : 'Edit note' }}
         </button>
         <button v-if="editing" class="px-3 py-1 text-xs bg-green-500/80 hover:bg-green-500 rounded-xl" @click="saveEdit"> Save </button>
+        <button class="px-3 py-1 text-xs bg-green-500/80 hover:bg-green-500 rounded-xl" @click="saveEdit"> Save </button>
       </div>
     </div>
   </div>

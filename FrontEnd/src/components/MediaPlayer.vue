@@ -127,7 +127,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div class="sticky bottom-0 z-10 w-full h-24 pl-10 pr-10 bg-[#23a517] rounded-4xl">
+    <div class="sticky bottom-0 z-10 w-full h-24 pl-10 pr-10 bg-[#23a517]">
         <div class="grid grid-cols-7 gap-4 h-full">
             <img
                 :src="trackCover || '/Logo3.png'"
