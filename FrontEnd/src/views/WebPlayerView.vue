@@ -66,6 +66,7 @@ const currentTrack = ref({
     artist: '',
     cover: '',
     duration: '',
+    path: '',
 });
 
 const currentSongIndex = ref(-1);

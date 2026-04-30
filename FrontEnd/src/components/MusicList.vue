@@ -1,5 +1,7 @@
 <script setup>
+import { ref, onMounted } from 'vue';
 import Song from './Song.vue';
+
 const props = defineProps({
     name: String,
     songs: {
@@ -32,9 +34,11 @@ const isSongPlaying = (song) => {
 //cover from https://covers.musichoarders.xyz/
 
 </script>
+
 <template>
     <div class="trending-artiste bg-black rounded-4xl p-10 m-4 text-white">
         <h2 class="text-left font-bold text-3xl">{{ name }}</h2>
+
         <section class="m-5">
             <Song 
                 v-for="(song, index) in songs" 
@@ -43,6 +47,7 @@ const isSongPlaying = (song) => {
                 :artist="song.artist"
                 :duration="song.duration"
                 :cover="song.cover"
+                :path="song.path"
                 :is-playing-external="isSongPlaying(song)"
                 @play-state-change="handleSongPlayStateChange"
             />
