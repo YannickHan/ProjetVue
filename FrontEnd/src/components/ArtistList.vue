@@ -128,7 +128,7 @@ onBeforeUnmount(() => {
             <AddButton type="artistList" />
         </div>
     </div>
-    <section class="grid grid-cols-1 gap-6 mt-4 text-center text-lg pb-4">
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4 text-center text-lg pb-4">
         <div v-for="artist in artists" :key="artist.idArtist" @click="selectArtist(artist.nameArtist, artist.image)"
             class="relative h-72 bg-[#1a1a1a] rounded-4xl p-4 bg-cover bg-center bg-no-repeat hover:scale-105 transition-transform duration-300 cursor-pointer flex flex-col justify-end"
             :style="{ backgroundImage: `url(${artist.image})` }"
