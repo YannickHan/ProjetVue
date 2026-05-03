@@ -41,5 +41,5 @@
     <img src="/Logo.png" alt="Logo" class="logo pl-20 pr-20" />
     <TrendingArtiste @select-artist="handleSelectArtist" one="Taylor Swift" two="Justin Bieber" three="Doja Cat" type="default"/>
     <MusicList name="Trending Songs" :songs="songs" />
-    <Playlist name="Sélection de l'équipe" />
+    <Playlist name="Team selections" />
 </template>
