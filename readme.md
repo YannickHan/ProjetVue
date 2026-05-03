@@ -1,146 +1,228 @@
-# PhantomWaves
+# 🌊 PhantomWaves
 
-## Description
-PhantomWaves is a web development project built with HTML, CSS, and JavaScript.
+## 📖 Description
 
-## Installation
+**PhantomWaves** is a web development project built using **HTML, CSS, and JavaScript**, featuring a modular architecture with a Node.js backend and a dynamic frontend.
+
+---
+
+## 🚀 Getting Started
+
+### 📥 Clone the repository
 
 ```bash
 git clone <repository-url>
 cd phantomwaves
 ```
 
-## Commands
+---
 
-Back-End
+## 📦 Installation & Launch
+
 ```bash
-npm init -y
-npm install express cors
+npm run install
+npm run dev
 ```
 
-Front-End
+---
+
+## ⚙️ Available Commands
+
+### 🧪 Development
+
 ```bash
-npm install
+npm run install      # Install dependencies
+npm run start        # Start development server
+npm run dev          # Run development mode
 ```
 
-### Development
-```bash
-npm install      # Install dependencies
-npm start        # Start development server
-npm run dev      # Run development mode
-```
+### 🏗️ Build
 
-### Build
 ```bash
 npm run build    # Build for production
 npm run minify   # Minify assets
 ```
 
-### Testing
+### 🧹 Cleanup
+
+```bash
+npm run clean    # Remove build artifacts
+```
+
+### ✅ Testing
+
 ```bash
 npm test         # Run tests
 npm run lint     # Lint code
 ```
 
-### Cleanup
-```bash
-npm run clean    # Remove build artifacts
-```
+---
 
-## Project Structure
+## 📁 Project Structure
+
 ```
 phantomwaves/
-├── index.html
-├── css/
-├── js/
-└── assets/
+├── Backend/
+├── Frontend/
 ```
 
-## Usage
-Open `index.html` in your browser to view the project.
+---
 
-## License
-MIT
+## 🖥️ Usage
 
-## Author
-[Your Name]
+Open `index.html` in your browser or run the development server for a better experience.
 
-## MongoDB
-1. Installation des dépendances
+---
 
-Dans votre dossier server/, installez Mongoose :
+## ✨ Features
+
+* 🔐 Login system
+* 🚪 Logout & page restriction
+* 🎵 Web player integrated in the navbar
+
+---
+
+## 🗄️ MySQL Integration
+
+### 1. Install dependencies
 
 ```bash
 cd server
-npm install mongoose
+npm install mysql2
 ```
 
-2. Configuration de la connexion
+---
 
-Modifiez votre fichier server/index.js pour inclure la connexion à la base de données.
+### 2. Setup database connection
 
-    [!TIP]
-    Si vous n'avez pas MongoDB installé localement, je vous conseille d'utiliser MongoDB Atlas (le cloud gratuit) pour obtenir une URL de connexion (SRV).
+Update your `server/index.js`:
 
-```Bash
-JavaScript
+```js
 const express = require('express');
-const mongoose = require('mongoose');
+const mysql = require('mysql2');
 const cors = require('cors');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Connexion à MongoDB (Remplacez l'URL par la vôtre si vous utilisez Atlas)
-mongoose.connect('mongodb://127.0.0.1:27017/ma_base_de_donnees')
-  .then(() => console.log("Connecté à MongoDB !"))
-  .catch(err => console.error("Erreur de connexion :", err));
-
-// Définition d'un Modèle (Exemple: Item)
-const Item = mongoose.model('Item', { name: String });
-
-// Route pour récupérer les données de la DB
-app.get('/api/items', async (req, res) => {
-  const items = await Item.find();
-  res.json(items);
+// MySQL connection
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '', // ← replace with your password
+  database: 'phantomwaves_db'
 });
 
-// Route pour ajouter une donnée
-app.post('/api/items', async (req, res) => {
-  const newItem = new Item({ name: req.body.name });
-  await newItem.save();
-  res.json(newItem);
+db.connect(err => {
+  if (err) {
+    console.error('❌ MySQL connection error:', err);
+    return;
+  }
+  console.log('✅ Connected to MySQL');
 });
 
-app.listen(3000, () => console.log('Serveur sur le port 3000'));
+// Get all items
+const getTrendingSongsHandler = async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT s.idSong AS idSong, s.titleSong, s.durationSong, s.coverSong, pathSong, a.nameArtist FROM song s
+      INNER JOIN artisthassong ahs ON ahs.song_idSong = s.idSong
+      LEFT JOIN artist a ON ahs.artist_idArtist = a.idArtist
+      WHERE highlightedSong = 1;
+    `);
+    res.json(rows);
+  } catch (error) {
+    console.error('GetTrendingSongs error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Add new item
+const updateSongHandler = async (req, res) => {
+  const { idSong } = req.params;
+  const { title, release, duration, cover, mp3Url } = req.body;
+
+  if (!title) {
+    return res.status(400).json({ success: false, message: 'Title is required' });
+  }
+
+  try {
+    const [result] = await pool.query(
+      'UPDATE Song SET titleSong = ?, releaseSong = ?, durationSong = ?, coverSong = ?, pathSong = ? WHERE idSong = ?',
+      [title, release || null, duration || null, cover || null, mp3Url || null, idSong]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'Song not found' });
+    }
+
+    res.json({ success: true, message: 'Song updated successfully' });
+  } catch (error) {
+    console.error('UpdateSong error:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};
+
+
+app.listen(3000, () => console.log('🚀 Server running on port 3000'));
 ```
 
-3. Architecture recommandée
+---
 
-Pour garder un code propre (surtout si votre projet grandit), il est préférable de séparer les responsabilités. Voici le schéma classique d'une application Express avec MongoDB :
+### 3. Example Database
 
-    Models/ : Définit la structure de vos données (Schémas Mongoose).
+Create your database and table:
 
-    Routes/ : Définit les points d'entrée de votre API.
+```sql
+CREATE DATABASE IF NOT EXISTS `mydb`;
+USE `mydb`;
 
-    Controllers/ : Contient la logique métier (ce qui se passe quand on appelle une route).
+CREATE TABLE `artist` (
+  `idArtist` int NOT NULL AUTO_INCREMENT,
+  `nameArtist` varchar(45) NOT NULL,
+  `highlightedArtist` tinyint(1) NOT NULL,
+  `horizontalBannerArtist` varchar(255) DEFAULT NULL,
+  `verticalBannerArtist` varchar(255) DEFAULT NULL,
+  `profileArtist` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`idArtist`)
+) ENGINE=InnoDB;
+```
 
-4. Test dans Vue.js
+---
 
-```bash
-// Dans un composant Vue
+## 🏗️ Recommended Architecture
+
+For scalability and clean code:
+
+* **Models/** → Database queries / schema abstraction
+* **Routes/** → API endpoints
+* **Controllers/** → Business logic
+
+---
+
+## 🔌 Example Usage in Vue.js
+
+```js
 const addItem = async (name) => {
   await fetch('/api/items', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: name })
+    body: JSON.stringify({ name })
   });
-  // Rafraîchir la liste après l'ajout...
 };
 ```
 
-4. Fonctionality
-- Login
-- Log out and page restriction
-- webplayer on the navbar
+---
+
+## 📜 License
+
+MIT
+
+---
+
+## 👤 Author
+
+Yannick SHANG QIANG HAN | TP145875
+Inès Souad BENALIA | TP145275
+Kim Lan TRAN | TP146161
