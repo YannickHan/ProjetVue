@@ -39,6 +39,22 @@ export const getSongs = async () => {
     return await res.json();
 };
 
+export const searchSongsByTitle = async (title) => {
+    const params = new URLSearchParams({ title: title || "" });
+    const res = await fetch(`${API_URL}/api/songs/search?${params.toString()}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+
+    if (!res.ok) {
+        throw new Error("Failed to search songs");
+    }
+
+    return await res.json();
+};
+
 export const updateSong = async (songId, songData) => {
     const res = await fetch(`${API_URL}/api/songs/${songId}`, {
         method: "PUT",
@@ -76,6 +92,18 @@ export const getArtists = async () => {
     });
     if (!res.ok) throw new Error('Failed to fetch artists');
     return await res.json();
+};
+
+export const getLikedSongs = async (userId) => {
+    const res = await fetch(`${API_URL}/api/users/${userId}/likes`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+        throw new Error(data?.message || 'Failed to fetch liked songs');
+    }
+    return data;
 };
 
 export const addSong = async (songData) => {
@@ -137,5 +165,38 @@ export const deleteArtist = async (artistId) => {
     if (!res.ok) {
         throw new Error(data?.message || data?.error || "Failed to delete artist");
     }
+    return data;
+};
+
+export const likeSong = async (songId, userId) => {
+    const res = await fetch(`${API_URL}/api/songs/${songId}/like`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.message || 'Failed to like song');
+    return data;
+};
+
+export const unlikeSong = async (songId, userId) => {
+    const res = await fetch(`${API_URL}/api/songs/${songId}/like`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.message || 'Failed to unlike song');
+    return data;
+};
+
+export const getUserLikes = async (userId) => {
+    const res = await fetch(`${API_URL}/api/users/${userId}/likes`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+    });
+    const data = await res.json().catch(() => ({}));
+    console.log(`Fetched liked songs for user ${userId}:`, data);
+    if (!res.ok) throw new Error(data?.message || 'Failed to get user likes');
     return data;
 };

@@ -11,8 +11,11 @@ import ArtistList from '../components/ArtistList.vue';
 import SongsData from '../assets/songsData.json';
 import Footer from '../components/Footer.vue';
 import { logout } from "../store/auth";
+import { searchSongsByTitle } from '../store/Song';
 
 const songs = ref(SongsData);
+const searchResults = ref([]);
+const searchQuery = ref('');
 
 const handleLogout = () => {
   logout();
@@ -24,6 +27,21 @@ const handleChangeView = (view) => {
   activeView.value = view;
 };
 
+const handleSearchSongs = async (query) => {
+  searchQuery.value = query;
+  try {
+    if (!query) {
+      searchResults.value = [];
+      return;
+    }
+    const data = await searchSongsByTitle(query);
+    searchResults.value = data;
+  } catch (error) {
+    console.error('Error searching songs:', error);
+    searchResults.value = [];
+  }
+};
+
 const currentTrack = ref({
     isPlaying: false,
     name: '',
@@ -31,6 +49,10 @@ const currentTrack = ref({
     cover: '',
     duration: '',
 });
+
+const handleSongPlayStateChange = (payload) => {
+  currentTrack.value = payload;
+};
 
 // ----------------------------This handle the filtering ----------------------------
 const filters = ref({
@@ -83,42 +105,47 @@ const processedSongs = computed(() => {
 
   return result;
 });
+
+const displayedSongs = computed(() => {
+  if (searchQuery.value) return searchResults.value;
+  return processedSongs.value;
+});
 </script>
 
 <template>
   <div>
-    <div class="grid grid-cols-[0.2fr_0.8fr] h-275 w-screen p-4 gap-4">
+    <div class="grid grid-cols-1 lg:grid-cols-[0.2fr_0.8fr] grid-rows-[auto_1fr] lg:grid-rows-1 h-screen w-screen p-2 sm:p-4 gap-2 sm:gap-4">
         <AdminLeftbar :active-view="activeView" @change-view="handleChangeView" />
-        <div class="bg-black text-white h-full w-full flex flex-col overflow-y-auto rounded-4xl">
-            <div v-if="activeView === 'dashboard'" class="text-2xl font-bold">
+        <div class="bg-black text-white h-full w-full flex flex-col overflow-y-auto rounded-2xl sm:rounded-4xl">
+            <div v-if="activeView === 'dashboard'" class="text-lg sm:text-2xl font-bold">
               <AdminDashboard/>
               <Footer class="pb-10" />
             </div>
-            <div v-else-if="activeView === 'musicList'" class="text-2xl font-bold">
-              <div class="flex items-center gap-4 m-5">
-                  <div class="flex-1">
-                    <SearchBar />
+            <div v-else-if="activeView === 'musicList'" class="text-lg sm:text-2xl font-bold">
+              <div class="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 m-2 sm:m-5">
+                  <div class="flex-1 w-full">
+                    <SearchBar @search="handleSearchSongs" />
                   </div>
               </div>
-              <div class="flex m-5">
-                <div :class="hasFilters ? 'w-34' : 'w-25'" class="relative">
+              <div class="flex flex-col sm:flex-row gap-2 sm:gap-0 m-2 sm:m-5">
+                <div :class="hasFilters ? 'w-34' : 'w-25'" class="relative w-full sm:w-auto">
                   <Filter @update:filters="handleFilters" />
                 </div>
                 <Sort @sort-change="handleSortChange" type="songCatalog" />
-                <div class="ml-auto">
+                <div class="ml-auto w-full sm:w-auto">
                   <AddButton type="songCatalog"/>
                 </div>
               </div>
               <MusicList 
                     name="Song Catalog"
-                    :songs="processedSongs"
+                    :songs="displayedSongs"
                     :current-track="currentTrack"
                     @song-play-state-change="handleSongPlayStateChange"
                     class="transition-all duration-300 ease-in-out"
                 />
               <Footer class="pb-10" />
             </div>
-            <div v-else="activeView === 'artistList'" class="text-2xl font-bold">
+            <div v-else="activeView === 'artistList'" class="text-lg sm:text-2xl font-bold">
                 <ArtistList />
               <Footer class="pb-10"/>
             </div>

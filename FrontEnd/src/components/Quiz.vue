@@ -1,7 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import song from '../assets/songsData.json'
-
+import { getSongs } from '../store/Song';
 const emit = defineEmits(['play-song'])
 
 const props = defineProps({
@@ -20,45 +19,48 @@ const randomizer = (song) => {
 }
 
 const initCards = () => {
-    const Song1 = randomizer(song)
-    const Song2 = randomizer(song)
-    const Song3 = randomizer(song)
-    
-    if (Song1 === Song2 || Song1 === Song3 || Song2 === Song3) {
-        return initCards()
-    }
-    else {
-        cards.value = [
-            {
-                id: 1,
-                title: 'Card 1',
-                name: Song1.name,
-                artist: Song1.artist,
-                image: Song1.cover,
-                duration: Song1.duration,
-                flipped: false,
-            },
-            {
-                id: 2,
-                title: 'Card 2',
-                name: Song2.name,
-                artist: Song2.artist,
-                image: Song2.cover,
-                duration: Song2.duration,
-                flipped: false,
-            },
-            {
-                id: 3,
-                title: 'Card 3',
-                name: Song3.name,
-                artist: Song3.artist,
-                image: Song3.cover,
-                duration: Song3.duration,
-                flipped: false,
-            },
-        ]
-    }
+    getSongs().then((song) => {
+        const Song1 = randomizer(song)
+        const Song2 = randomizer(song)
+        const Song3 = randomizer(song)
+
+        if (Song1 === Song2 || Song1 === Song3 || Song2 === Song3) {
+            return initCards()
+        }
+        else {
+            cards.value = [
+                {
+                    id: 1,
+                    title: 'Card 1',
+                    name: Song1.name,
+                    artist: Song1.artist,
+                    image: Song1.cover,
+                    duration: Song1.duration,
+                    flipped: false,
+                },
+                {
+                    id: 2,
+                    title: 'Card 2',
+                    name: Song2.name,
+                    artist: Song2.artist,
+                    image: Song2.cover,
+                    duration: Song2.duration,
+                    flipped: false,
+                },
+                {
+                    id: 3,
+                    title: 'Card 3',
+                    name: Song3.name,
+                    artist: Song3.artist,
+                    image: Song3.cover,
+                    duration: Song3.duration,
+                    flipped: false,
+                },
+            ]
+        }
+    })
 }
+
 
 const toggleCard = (id) => {
     const card = cards.value.find((item) => item.id === id)

@@ -1,5 +1,6 @@
 import { reactive } from "vue";
 import * as songServices from "../services/SongServices";
+import { authState } from "./auth";
 
 export const getTrendingArtists = async () => {
     const data = await songServices
@@ -26,6 +27,38 @@ export const getSongs = async () => {
     const data = await songServices
 .getSongs();
     return data;
+}
+
+export const getLikedSongs = async () => {
+    const userId = authState.user?.id;
+    if (!userId) {
+        return [];
+    }
+
+    const data = await songServices.getLikedSongs(userId);
+    const likedSongs = data?.likes ?? [];
+
+    return likedSongs.map(song => ({
+        id: song?.idSong ?? null,
+        name: song?.name ?? song?.titleSong ?? '',
+        artist: song?.artist ?? song?.nameArtist ?? 'Unknown artist',
+        duration: song?.duration ?? song?.durationSong ?? '',
+        cover: song?.cover ?? song?.coverSong ?? '',
+        path: song?.path ?? song?.pathSong ?? '',
+        trackPosition: song?.trackPosition ?? null,
+    }));
+}
+
+export const searchSongsByTitle = async (title) => {
+    const data = await songServices.searchSongsByTitle(title);
+    return data.map(song => ({
+        id: song?.idSong ?? song?.id ?? null,
+        name: song?.name ?? song?.titleSong ?? '',
+        artist: song?.artist ?? song?.nameArtist ?? 'Unknown artist',
+        duration: song?.duration ?? song?.durationSong ?? '',
+        cover: song?.cover ?? song?.coverSong ?? '',
+        path: song?.path ?? song?.pathSong ?? '',
+    }));
 }
 
 export const getArtists = async () => {

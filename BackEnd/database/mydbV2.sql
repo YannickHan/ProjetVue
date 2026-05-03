@@ -90,7 +90,6 @@ CREATE TABLE `song` (
 CREATE TABLE `playlist` (
   `idPlaylist` int NOT NULL AUTO_INCREMENT,
   `namePlaylist` varchar(45) NOT NULL,
-  `datePlaylist` date NOT NULL,
   `highlightedPlaylist` tinyint(1) NOT NULL,
   `User_idUser` int DEFAULT NULL,
   PRIMARY KEY (`idPlaylist`),

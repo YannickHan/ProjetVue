@@ -15,7 +15,7 @@ const props = defineProps({
     }
 });
 
-const emit = defineEmits(['song-play-state-change']);
+const emit = defineEmits(['song-play-state-change', 'like-changed']);
 
 const localSongs = ref([]);
 
@@ -29,6 +29,10 @@ watch(
 
 const handleSongPlayStateChange = (payload) => {
     emit('song-play-state-change', payload);
+};
+
+const handleLikeChanged = (payload) => {
+    emit('like-changed', payload);
 };
 
 const handleSongDeleted = (payload) => {
@@ -85,13 +89,13 @@ const isSongPlaying = (song) => {
 </script>
 
 <template>
-    <div class="trending-artiste bg-black rounded-4xl p-10 m-4 text-white">
-        <h2 class="text-left font-bold text-3xl">{{ name }}</h2>
+    <div class="trending-artiste bg-black rounded-2xl sm:rounded-4xl p-3 sm:p-10 m-1 sm:m-4 text-white">
+        <h2 class="text-left font-bold text-xl sm:text-3xl">{{ name }}</h2>
 
-        <section class="m-5">
+        <section class="m-1 sm:m-5">
             <Song 
                 v-for="(song, index) in localSongs" 
-                :key="index"
+                :key="song.id ?? song.idSong ?? `${song.name}-${song.artist}-${song.duration}`"
                 :id-song="song.id ?? song.idSong"
                 :name="song.name"
                 :artist="song.artist"
@@ -102,6 +106,7 @@ const isSongPlaying = (song) => {
                 @play-state-change="handleSongPlayStateChange"
                 @song-deleted="handleSongDeleted"
                 @song-updated="handleSongUpdated"
+                @like-changed="handleLikeChanged"
             />
         </section>
     </div>

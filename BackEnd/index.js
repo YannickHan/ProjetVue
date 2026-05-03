@@ -4,7 +4,7 @@ const { PORT } = require('./config');
 
 // Import handlers
 const { profileHandler, loginHandler, registerHandler } = require('./handlers/authHandler');
-const { getSongsHandler, getTrendingArtistsHandler, getTrendingSongsHandler, addSongHandler, getArtistsHandler, addArtistHandler, updateArtistHandler, deleteArtistHandler, updateSongHandler, deleteSongHandler } = require('./handlers/musicHandler');
+const { getSongsHandler, searchSongsByTitleHandler, getTrendingArtistsHandler, getTrendingSongsHandler, addSongHandler, getArtistsHandler, addArtistHandler, updateArtistHandler, deleteArtistHandler, updateSongHandler, deleteSongHandler, addLikeHandler, removeLikeHandler, getUserLikesHandler } = require('./handlers/musicHandler');
 const { addSAVHandler, getSAVHandler, updateStatusSAVHandler, updateAdminNoteSAVHandler } = require('./handlers/savHandler');
 
 const app = express();
@@ -26,11 +26,16 @@ app.post(['/api/register', '/register'], registerHandler);
 
 // Music routes
 app.get('/api/songs', getSongsHandler);
+app.get('/api/songs/search', searchSongsByTitleHandler);
 app.get('/api/trendingArtists', getTrendingArtistsHandler);
 app.get('/api/trendingSongs', getTrendingSongsHandler);
 app.post('/api/addSongs', addSongHandler);
 app.put('/api/songs/:idSong', updateSongHandler);
 app.delete('/api/songs/:idSong', deleteSongHandler);
+// Likes
+app.post('/api/songs/:idSong/like', addLikeHandler);
+app.delete('/api/songs/:idSong/like', removeLikeHandler);
+app.get('/api/users/:idUser/likes', getUserLikesHandler);
 app.get('/api/artists', getArtistsHandler);
 app.post('/api/artists', addArtistHandler);
 app.put('/api/artists/:idArtist', updateArtistHandler);

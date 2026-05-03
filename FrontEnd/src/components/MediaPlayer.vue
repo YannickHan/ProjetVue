@@ -127,20 +127,20 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div class="fixed bottom-0 z-10 w-full h-24 pl-10 pr-10 bg-[#23a517]">
-        <div class="grid grid-cols-7 gap-4 h-full">
+    <div class="fixed bottom-0 z-10 w-full h-16 sm:h-24 pl-2 sm:pl-10 pr-2 sm:pr-10 bg-[#23a517]">
+        <div class="grid grid-cols-4 sm:grid-cols-7 gap-1 sm:gap-4 h-full">
             <img
                 :src="trackCover || '/Logo3.png'"
                 alt="Track cover"
-                class="w-16 h-16 object-cover rounded-md border mx-auto my-auto hover:scale-115 transition-transform duration-300"
+                class="w-10 sm:w-16 h-10 sm:h-16 object-cover rounded-md border mx-auto my-auto hover:scale-115 transition-transform duration-300"
             />
-            <div class="flex flex-col justify-center">
+            <div class="hidden sm:flex flex-col justify-center">
                 <p class="text-xl font-bold">{{ trackName || 'No track selected' }}</p>
                 <p class="text-sm opacity-80">{{ trackArtist || 'Choose a song from the list' }}</p>
             </div>
             <button
                 type="button"
-                class="text-2xl cursor-pointer self-center rounded-lg hover:scale-115 transition-transform duration-300"
+                class="text-xl sm:text-2xl cursor-pointer self-center rounded-lg hover:scale-115 transition-transform duration-300"
                 :aria-label="'Previous track'"
                 @click="handlePrevSong"
             >
@@ -148,7 +148,7 @@ onBeforeUnmount(() => {
             </button>
             <button
                 type="button"
-                class="text-3xl cursor-pointer self-center rounded-4xl hover:scale-115 transition-transform duration-300"
+                class="text-2xl sm:text-3xl cursor-pointer self-center rounded-4xl hover:scale-115 transition-transform duration-300"
                 :aria-label="isPlaying ? 'Pause track' : 'Play track'"
                 @click="handleTogglePlay"
             >
@@ -156,14 +156,14 @@ onBeforeUnmount(() => {
             </button>
             <button
                 type="button"
-                class="text-2xl cursor-pointer self-center rounded-lg hover:scale-115 transition-transform duration-300"
+                class="text-xl sm:text-2xl cursor-pointer self-center rounded-lg hover:scale-115 transition-transform duration-300"
                 :aria-label="'Next track'"
                 @click="handleNextSong"
             >
                 ⏭
             </button>
-            <P></P>
-            <p class="text-sm font-semibold opacity-90 self-center">{{ displayedElapsed }} / {{ trackDuration || '0:00' }}</p>
+            <div class="hidden sm:block"></div>
+            <p class="hidden sm:block text-sm font-semibold opacity-90 self-center">{{ displayedElapsed }} / {{ trackDuration || '0:00' }}</p>
         </div>
         <div class="absolute bottom-0 left-0 w-full h-1 bg-gray-300 rounded-b-4xl">
             <div class="h-full bg-yellow-500 rounded-b-4xl" :style="{ width: `${progressPercent}%` }"></div>

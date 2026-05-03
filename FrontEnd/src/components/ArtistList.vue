@@ -120,15 +120,15 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="trending-artiste rounded-4xl p-10 text-white">
-    <div class="flex items-center">
-        <h2 class="font-bold text-3xl">Artist List</h2>
-        <div class="ml-auto flex items-center gap-3">
+  <div class="trending-artiste rounded-2xl sm:rounded-4xl p-3 sm:p-10 text-white">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0">
+        <h2 class="font-bold text-xl sm:text-3xl">Artist List</h2>
+        <div class="ml-auto flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
             <Sort type="artistList" @sort-change="handleSortChange" />
             <AddButton type="artistList" />
         </div>
     </div>
-    <section class="grid grid-cols-3 gap-6 mt-4 text-center text-lg pb-4">
+    <section class="grid grid-cols-1 gap-6 mt-4 text-center text-lg pb-4">
         <div v-for="artist in artists" :key="artist.idArtist" @click="selectArtist(artist.nameArtist, artist.image)"
             class="relative h-72 bg-[#1a1a1a] rounded-4xl p-4 bg-cover bg-center bg-no-repeat hover:scale-105 transition-transform duration-300 cursor-pointer flex flex-col justify-end"
             :style="{ backgroundImage: `url(${artist.image})` }"
@@ -148,22 +148,22 @@ onBeforeUnmount(() => {
           </div>
         </div>
     </section>
-    <div v-if="editArtist" class="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50">
-      <div class="w-full max-w-2xl rounded-2xl border border-white/5 bg-black/90 p-6 relative">
-        <h1 class="text-xl font-bold mb-6">Modify parameters</h1>
-        <form class="space-y-4" @submit.prevent="handleSaveEdit">
+    <div v-if="editArtist" class="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div class="w-full max-w-2xl rounded-2xl border border-white/5 bg-black/90 p-4 sm:p-6 relative">
+        <h1 class="text-lg sm:text-xl font-bold mb-4 sm:mb-6">Modify parameters</h1>
+        <form class="space-y-3 sm:space-y-4" @submit.prevent="handleSaveEdit">
           <div>
-            <label class="block text-sm text-white/70 mb-1">Stage name</label>
-            <input v-model="editArtist.name" type="text" name="name" required class="text-lg w-full bg-white/5 border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500"/>
+            <label class="block text-xs sm:text-sm text-white/70 mb-1">Stage name</label>
+            <input v-model="editArtist.name" type="text" name="name" required class="text-base w-full bg-white/5 border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500"/>
           </div>
           <div>
-            <label class="block text-sm text-white/70 mb-1">Artist photo URL</label>
-            <input v-model="editArtist.coverUrl" type="text" name="coverUrl" required class="text-lg w-full bg-white/5 border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500"/>
+            <label class="block text-xs sm:text-sm text-white/70 mb-1">Artist photo URL</label>
+            <input v-model="editArtist.coverUrl" type="text" name="coverUrl" required class="text-base w-full bg-white/5 border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500"/>
           </div>
-          <div class="flex justify-end gap-3 pt-4">
-            <button type="button" @click="handleDeleteArtist" class="px-4 py-2 text-sm rounded-xl bg-red-600 hover:bg-red-500 transition"> Delete </button>
-            <button type="button" @click="closeEdit" class="px-4 py-2 text-sm rounded-xl bg-white/10 hover:bg-white/20 transition"> Cancel </button>
-            <button type="submit" class="px-5 py-2 text-sm rounded-xl bg-green-600 hover:bg-green-500 transition"> Save </button>
+          <div class="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4">
+            <button type="button" @click="handleDeleteArtist" class="px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-xl bg-red-600 hover:bg-red-500 transition"> Delete </button>
+            <button type="button" @click="closeEdit" class="px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-xl bg-white/10 hover:bg-white/20 transition"> Cancel </button>
+            <button type="submit" class="px-4 sm:px-5 py-2 text-xs sm:text-sm rounded-xl bg-green-600 hover:bg-green-500 transition"> Save </button>
           </div>
         </form>
       </div>

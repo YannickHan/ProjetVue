@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount, reactive } from 'vue'
 import { authState } from "../store/auth"
-import { updateSong, deleteSong } from '../services/SongServices'
+import { updateSong, deleteSong, likeSong, unlikeSong, getUserLikes } from '../services/SongServices'
 
 // ----------------------------This handle the parent----------------------------
 const props = defineProps({
@@ -17,15 +17,73 @@ const props = defineProps({
 })
 
 // ----------------------------This handle the parent----------------------------
-const emit = defineEmits(['play-state-change', 'song-deleted', 'song-updated'])
+const emit = defineEmits(['play-state-change', 'song-deleted', 'song-updated', 'like-changed'])
 
 // ----------------------------This handle the like---------------------------- 
-const isLiked = ref(false) 
-const isPlaying = ref(false) 
+const isLiked = ref(false)
+const isPlaying = ref(false)
 
-const toggleLike = () => { 
-  isLiked.value = !isLiked.value 
-} 
+const STORAGE_KEY = 'phantomwaves_liked_songs'
+
+const computeSongKey = () => {
+  // Prefer stable DB id when available, otherwise fallback to a composite key
+  if (props.idSong) return `song:${props.idSong}`
+  return `local:${(props.name || '')}::${(props.artist || '')}`
+}
+
+const getLikedSongsFromStorage = () => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? JSON.parse(raw) : []
+  } catch (e) {
+    console.warn('Failed to parse liked songs from storage', e)
+    return []
+  }
+}
+
+const saveLikedSongsToStorage = (arr) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(arr))
+  } catch (e) {
+    console.warn('Failed to save liked songs to storage', e)
+  }
+}
+
+const toggleLike = async () => {
+  // Optimistic UI
+  const previous = isLiked.value
+  isLiked.value = !previous
+  const key = computeSongKey()
+
+  // If user is logged in and song has DB id, persist server-side
+  const userId = authState.user?.id ?? null
+  if (userId && props.idSong) {
+    try {
+      if (!previous) {
+        await likeSong(props.idSong, userId)
+      } else {
+        await unlikeSong(props.idSong, userId)
+      }
+    } catch (e) {
+      // revert on error and fallback to localStorage
+      console.error('Like API error:', e)
+      isLiked.value = previous
+      alert('❌ Failed to update like on server; saved locally instead.')
+      // fallback: update local storage below
+    }
+  }
+
+  // Update local storage as a fallback / local cache
+  const liked = getLikedSongsFromStorage()
+  if (isLiked.value) {
+    if (!liked.includes(key)) liked.push(key)
+  } else {
+    const idx = liked.indexOf(key)
+    if (idx >= 0) liked.splice(idx, 1)
+  }
+  saveLikedSongsToStorage(liked)
+  emit('like-changed', { key, liked: isLiked.value, idSong: props.idSong || null })
+}
 
 const togglePlay = () => { 
   isPlaying.value = !isPlaying.value 
@@ -170,8 +228,30 @@ const handleClickOutside = (e) => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   document.addEventListener('click', handleClickOutside)
+  // initialize liked state from localStorage
+  try {
+    const key = computeSongKey()
+    const liked = getLikedSongsFromStorage()
+    isLiked.value = liked.includes(key)
+
+    // If logged in and song has id, try to fetch server liked state (prefer server)
+    const userId = authState.user?.id ?? null
+    if (userId && props.idSong) {
+      try {
+        const res = await getUserLikes(userId)
+        if (res && res.likes) {
+          const songId = Number(props.idSong)
+          isLiked.value = res.likes.some(song => Number(song.idSong) === songId) || isLiked.value
+        }
+      } catch (e) {
+        console.warn('Failed to fetch user likes', e)
+      }
+    }
+  } catch (e) {
+    console.warn('Error initializing liked state', e)
+  }
 })
 
 onBeforeUnmount(() => {
@@ -180,27 +260,44 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div class="grid grid-cols-[0.2fr_0.2fr_1fr_1fr_1fr_0.2fr_0.2fr] text-center items-center bg-black rounded-lg hover:bg-[#1a1a1a] transition-colors duration-300">
+    <div class="grid grid-cols-[0.15fr_0.2fr_1fr_0.15fr_0.15fr] sm:grid-cols-[0.2fr_0.2fr_1fr_1fr_1fr_0.2fr_0.2fr] text-center items-center bg-black rounded-lg hover:bg-[#1a1a1a] transition-colors duration-300 p-2 sm:p-0">
+        <!-- Play Button -->
         <button @click="togglePlay" type="button" class="w-full h-full mx-auto rounded-lg hover:bg-[#3a3a3a] flex items-center justify-center text-white cursor-pointer" :aria-label="isPlaying ? 'Pause song' : 'Play song'">
-            <span class="ml-0.5">{{ isPlaying ? '⏸' : '▶' }}</span>
+            <span class="ml-0.5 text-sm sm:text-base">{{ isPlaying ? '⏸' : '▶' }}</span>
         </button>
-        <img :src="cover" alt="Cover Image" class="w-16 h-16 rounded-lg mx-auto">
-        <p class="text-left">{{ name }}</p>
-        <p>{{ artist }}</p>
-        <p>{{ duration }}</p>
-        <img :src="isLiked ? 'https://cdn-icons-png.flaticon.com/512/2107/2107845.png' : 'https://cdn-icons-png.flaticon.com/512/1000/1000621.png'" alt="like" class="w-5 h-5 mx-auto cursor-pointer hover:scale-110 transition-transform duration-300" @click="toggleLike">
+        
+        <!-- Cover Image -->
+        <img :src="cover" alt="Cover Image" class="w-12 sm:w-16 h-12 sm:h-16 rounded-lg mx-auto">
+        
+        <!-- Name and Artist (mobile: combined, desktop: separate) -->
+        <div class="sm:hidden text-left px-2">
+            <p class="text-sm font-semibold">{{ name }}</p>
+            <p class="text-xs text-gray-400">{{ artist }}</p>
+        </div>
+        <p class="hidden sm:block text-left">{{ name }}</p>
+        
+        <!-- Artist (desktop only) -->
+        <p class="hidden sm:block">{{ artist }}</p>
+        
+        <!-- Duration (desktop only) -->
+        <p class="hidden sm:block">{{ duration }}</p>
+        
+        <!-- Like Button -->
+        <img :src="isLiked ? 'https://cdn-icons-png.flaticon.com/512/2107/2107845.png' : 'https://cdn-icons-png.flaticon.com/512/1000/1000621.png'" alt="like" class="w-4 sm:w-5 h-4 sm:h-5 mx-auto cursor-pointer hover:scale-110 transition-transform duration-300" @click="toggleLike">
+        
+        <!-- Settings Button -->
         <div ref="dropdownRef" class="relative inline-block"> 
           <img src="https://cdn-icons-png.flaticon.com/512/1828/1828687.png" 
               @click="open = !open"
               alt="Settings" 
-              class="w-5 h-5 mx-auto cursor-pointer hover:scale-110 transition-transform duration-300">
-          <div v-if="open && authState.user?.role === 'admin'" class="absolute right-0 mt-2 w-50 bg-black/60 border rounded text-white text-base z-50">
-            <div class="px-4 py-2 cursor-pointer hover:bg-white/90 hover:text-black" @click="openEdit()">Modify parameters</div>
-            <div class="px-4 py-2 cursor-pointer hover:bg-white/90 hover:text-black" @click.stop="handleDeleteSong(props.idSong, props.name)">Delete song</div>
+              class="w-4 sm:w-5 h-4 sm:h-5 mx-auto cursor-pointer hover:scale-110 transition-transform duration-300">
+          <div v-if="open && authState.user?.role === 'admin'" class="absolute right-0 mt-2 w-40 sm:w-50 bg-black/60 border rounded text-white text-xs sm:text-base z-50">
+            <div class="px-2 sm:px-4 py-2 cursor-pointer hover:bg-white/90 hover:text-black" @click="openEdit()">Modify parameters</div>
+            <div class="px-2 sm:px-4 py-2 cursor-pointer hover:bg-white/90 hover:text-black" @click.stop="handleDeleteSong(props.idSong, props.name)">Delete song</div>
           </div>
-          <div v-else-if="open" class="absolute right-0 mt-2 w-50 bg-black/60 border rounded text-white text-base z-50">
-            <div class="px-4 py-2 cursor-pointer hover:bg-white/90 hover:text-black">Option 1</div>
-            <div class="px-4 py-2 cursor-pointer hover:bg-white/90 hover:text-black">Option 2</div>
+          <div v-else-if="open" class="absolute right-0 mt-2 w-40 sm:w-50 bg-black/60 border rounded text-white text-xs sm:text-base z-50">
+            <div class="px-2 sm:px-4 py-2 cursor-pointer hover:bg-white/90 hover:text-black">Option 1</div>
+            <div class="px-2 sm:px-4 py-2 cursor-pointer hover:bg-white/90 hover:text-black">Option 2</div>
           </div>
         </div>
     </div>

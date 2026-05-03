@@ -3,6 +3,15 @@ import { ref } from "vue";
 
 const isFocused = ref(false)
 const input = ref("")
+const emit = defineEmits(['search'])
+
+const submitSearch = () => {
+    emit('search', input.value.trim())
+}
+
+const handleInput = () => {
+    emit('search', input.value.trim())
+}
 </script>
 
 <template>
@@ -11,6 +20,6 @@ const input = ref("")
         <input v-model="input" type="text" placeholder="Search for songs, artists, albums or genres..." 
         class="w-full pl-12 pr-4 py-3 placeholder-white/50 rounded-full border border-white outline-none appearance-none
         focus:border-none focus:ring-2 focus:placeholder-green-500 focus:ring-green-500" 
-        @focus="isFocused = true" @blur="isFocused = false"/>
+        @focus="isFocused = true" @blur="isFocused = false" @input="handleInput" @keyup.enter="submitSearch"/>
     </div>
 </template>

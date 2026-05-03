@@ -24,6 +24,41 @@ const getSongsHandler = async (req, res) => {
   }
 };
 
+const searchSongsByTitleHandler = async (req, res) => {
+  const title = (req.query.title || '').trim();
+
+  if (!title) {
+    return res.json([]);
+  }
+
+  console.log(`Searching songs with title like: ${title}`);
+  
+  try {
+    const [rows] = await pool.query(
+      `
+      SELECT
+        s.idSong AS idSong,
+        s.titleSong AS name,
+        a.nameArtist AS artist,
+        s.durationSong AS duration,
+        s.coverSong AS cover,
+        s.pathSong AS path
+      FROM Song s
+      JOIN ArtistHasSong ahs ON s.idSong = ahs.Song_idSong
+      JOIN Artist a ON a.idArtist = ahs.Artist_idArtist
+      WHERE s.titleSong LIKE ?
+      ORDER BY s.titleSong ASC
+      `,
+      [`%${title}%`]
+    );
+
+    res.json(rows);
+  } catch (error) {
+    console.error('SearchSongsByTitle error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 const getTrendingArtistsHandler = async (req, res) => {
   try {
     const [rows] = await pool.query(`
@@ -101,6 +136,128 @@ const deleteSongHandler = async (req, res) => {
     res.json({ success: true, message: 'Song deleted successfully' });
   } catch (error) {
     console.error('DeleteSong error:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};
+
+// Likes handlers (using Playlist/PlaylistHasSong)
+const addLikeHandler = async (req, res) => {
+  const { idSong } = req.params;
+  const { userId } = req.body;
+
+  if (!userId) return res.status(400).json({ success: false, message: 'userId is required' });
+
+  try {
+    // Ensure song exists
+    const [songRows] = await pool.query('SELECT idSong FROM Song WHERE idSong = ?', [idSong]);
+    if (!songRows || songRows.length === 0) return res.status(404).json({ success: false, message: 'Song not found' });
+
+    // Get user's "Liked" playlist
+    const [playlistRows] = await pool.query(
+      'SELECT idPlaylist FROM Playlist WHERE User_idUser = ? AND namePlaylist = ?',
+      [userId, 'Liked']
+    );
+    if (!playlistRows || playlistRows.length === 0) {
+      return res.status(404).json({ success: false, message: 'User Liked playlist not found' });
+    }
+    const playlistId = playlistRows[0].idPlaylist;
+
+    // Check if song already liked
+    const [exists] = await pool.query(
+      'SELECT Playlist_idPlaylist FROM PlaylistHasSong WHERE Playlist_idPlaylist = ? AND Song_idSong = ?',
+      [playlistId, idSong]
+    );
+    if (exists && exists.length > 0) {
+      return res.json({ success: true, message: 'Already liked' });
+    }
+
+    // Get next trackPosition
+    const [maxPos] = await pool.query(
+      'SELECT MAX(trackPosition) as maxPos FROM PlaylistHasSong WHERE Playlist_idPlaylist = ?',
+      [playlistId]
+    );
+    const nextPos = (maxPos[0]?.maxPos || 0) + 1;
+
+    // Add song to Liked playlist
+    await pool.query(
+      'INSERT INTO PlaylistHasSong (Playlist_idPlaylist, Song_idSong, trackPosition) VALUES (?, ?, ?)',
+      [playlistId, idSong, nextPos]
+    );
+    res.json({ success: true, message: 'Liked' });
+  } catch (error) {
+    console.error('AddLike error:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};
+
+const removeLikeHandler = async (req, res) => {
+  const { idSong } = req.params;
+  const { userId } = req.body;
+
+  if (!userId) return res.status(400).json({ success: false, message: 'userId is required' });
+
+  try {
+    // Get user's "Liked" playlist
+    const [playlistRows] = await pool.query(
+      'SELECT idPlaylist FROM Playlist WHERE User_idUser = ? AND namePlaylist = ?',
+      [userId, 'Liked']
+    );
+    if (!playlistRows || playlistRows.length === 0) {
+      return res.status(404).json({ success: false, message: 'User Liked playlist not found' });
+    }
+    const playlistId = playlistRows[0].idPlaylist;
+
+    // Remove song from Liked playlist
+    const [result] = await pool.query(
+      'DELETE FROM PlaylistHasSong WHERE Playlist_idPlaylist = ? AND Song_idSong = ?',
+      [playlistId, idSong]
+    );
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'Like not found' });
+    }
+    res.json({ success: true, message: 'Unliked' });
+  } catch (error) {
+    console.error('RemoveLike error:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};
+
+const getUserLikesHandler = async (req, res) => {
+  const { idUser } = req.params;
+  try {
+    // Get user's "Liked" playlist
+    const [playlistRows] = await pool.query(
+      'SELECT idPlaylist FROM Playlist WHERE User_idUser = ? AND namePlaylist = ?',
+      [idUser, 'Liked']
+    );
+    if (!playlistRows || playlistRows.length === 0) {
+      return res.json({ success: true, likes: [] });
+    }
+    const playlistId = playlistRows[0].idPlaylist;
+
+    // Get all songs in user's Liked playlist with full song attributes
+    const [rows] = await pool.query(
+      `
+      SELECT
+        s.idSong AS idSong,
+        s.titleSong AS name,
+        a.nameArtist AS artist,
+        s.durationSong AS duration,
+        s.coverSong AS cover,
+        s.pathSong AS path,
+        phs.trackPosition AS trackPosition
+      FROM PlaylistHasSong phs
+      JOIN Song s ON s.idSong = phs.Song_idSong
+      LEFT JOIN ArtistHasSong ahs ON ahs.Song_idSong = s.idSong
+      LEFT JOIN Artist a ON a.idArtist = ahs.Artist_idArtist
+      WHERE phs.Playlist_idPlaylist = ?
+      ORDER BY phs.trackPosition ASC, s.titleSong ASC
+      `,
+      [playlistId]
+    );
+    res.json({ success: true, likes: rows });
+  } catch (error) {
+    console.error('GetUserLikes error:', error);
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 };
@@ -255,6 +412,7 @@ const deleteArtistHandler = async (req, res) => {
 
 module.exports = {
   getSongsHandler,
+  searchSongsByTitleHandler,
   getTrendingArtistsHandler,
   getTrendingSongsHandler,
   addSongHandler,
@@ -264,5 +422,6 @@ module.exports = {
   addArtistHandler,
   updateArtistHandler,
   deleteArtistHandler
+  , addLikeHandler, removeLikeHandler, getUserLikesHandler
 };
 
