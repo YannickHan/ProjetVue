@@ -4,6 +4,7 @@
   "description": "PhantomWaves is a web development project built with HTML, CSS, and JavaScript.",
   "main": "index.js",
   "scripts": {
+    "install": "npm install --prefix FrontEnd && npm install --prefix Backend",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd Backend && node index.js",
     "client": "cd FrontEnd && npm run dev -- --host 0.0.0.0"

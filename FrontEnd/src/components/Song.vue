@@ -1,9 +1,11 @@
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount, reactive } from 'vue'
 import { authState } from "../store/auth"
+import { updateSong, deleteSong } from '../services/SongServices'
 
 // ----------------------------This handle the parent----------------------------
 const props = defineProps({
+  idSong: [Number, String],
   name: String,
   artist: String,
   duration: String,
@@ -15,7 +17,7 @@ const props = defineProps({
 })
 
 // ----------------------------This handle the parent----------------------------
-const emit = defineEmits(['play-state-change'])
+const emit = defineEmits(['play-state-change', 'song-deleted', 'song-updated'])
 
 // ----------------------------This handle the like---------------------------- 
 const isLiked = ref(false) 
@@ -67,6 +69,95 @@ const openEdit = () => {
   open.value = false
 }
 
+const handleSaveSong = async (event) => {
+  event.preventDefault();
+  const id = props.idSong;
+
+  // Fallback for local/static songs that do not come from DB.
+  if (!id) {
+    emit('song-updated', {
+      idSong: null,
+      oldName: props.name,
+      oldArtist: props.artist,
+      oldDuration: props.duration,
+      oldCover: props.cover,
+      name: form.title,
+      artist: form.artist,
+      duration: props.duration,
+      cover: form.coverUrl,
+      path: form.mp3Url,
+    });
+    alert('✅ Song updated in the list.');
+    closeEdit();
+    return;
+  }
+
+  try {
+    await updateSong(id, {
+      title: form.title,
+      artist: form.artist,
+      mp3Url: form.mp3Url,
+      coverUrl: form.coverUrl,
+    });
+    emit('song-updated', {
+      idSong: id,
+      oldName: props.name,
+      oldArtist: props.artist,
+      oldDuration: props.duration,
+      oldCover: props.cover,
+      name: form.title,
+      artist: form.artist,
+      duration: props.duration,
+      cover: form.coverUrl,
+      path: form.mp3Url,
+    });
+    alert('✅ Song updated successfully!');
+    closeEdit();
+  } catch (err) {
+    console.error('Error updating song:', err);
+    alert(`❌ Error: ${err.message}`);
+  }
+}
+
+const handleDeleteSong = async (songId, songTitle) => {
+  const id = songId || props.idSong;
+  const name = songTitle || props.name;
+  if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+
+  // Fallback for local/static songs that do not come from DB.
+  if (!id) {
+    emit('song-deleted', {
+      idSong: null,
+      name: props.name,
+      artist: props.artist,
+      duration: props.duration,
+      cover: props.cover,
+    });
+    alert('✅ Song removed from the list.');
+    open.value = false;
+    closeEdit();
+    return;
+  }
+
+  try {
+    console.log('Deleting song with id:', id);
+    await deleteSong(id);
+    emit('song-deleted', {
+      idSong: id,
+      name: props.name,
+      artist: props.artist,
+      duration: props.duration,
+      cover: props.cover,
+    });
+    alert('✅ Song deleted successfully!');
+    open.value = false;
+    closeEdit();
+  } catch (err) {
+    console.error('Error deleting song:', err);
+    alert(`❌ Error: ${err.message}`);
+  }
+}
+
 const closeEdit = () => {
   editSong.value = false
 }
@@ -105,7 +196,7 @@ onBeforeUnmount(() => {
               class="w-5 h-5 mx-auto cursor-pointer hover:scale-110 transition-transform duration-300">
           <div v-if="open && authState.user?.role === 'admin'" class="absolute right-0 mt-2 w-50 bg-black/60 border rounded text-white text-base z-50">
             <div class="px-4 py-2 cursor-pointer hover:bg-white/90 hover:text-black" @click="openEdit()">Modify parameters</div>
-            <div class="px-4 py-2 cursor-pointer hover:bg-white/90 hover:text-black">Delete song</div>
+            <div class="px-4 py-2 cursor-pointer hover:bg-white/90 hover:text-black" @click.stop="handleDeleteSong(props.idSong, props.name)">Delete song</div>
           </div>
           <div v-else-if="open" class="absolute right-0 mt-2 w-50 bg-black/60 border rounded text-white text-base z-50">
             <div class="px-4 py-2 cursor-pointer hover:bg-white/90 hover:text-black">Option 1</div>
@@ -113,10 +204,10 @@ onBeforeUnmount(() => {
           </div>
         </div>
     </div>
-    <div v-if="editSong && authState.user?.role === 'admin'" class="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50">
+          <div v-if="editSong && authState.user?.role === 'admin'" class="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50">
       <div class="w-full max-w-2xl rounded-2xl border border-white/5 bg-black/90 p-6 relative">
         <h1 class="text-xl font-bold mb-6">Modify parameters</h1>
-        <form class="space-y-4">
+        <form class="space-y-4" @submit.prevent="handleSaveSong">
   <div>
     <label class="block text-sm text-white/70 mb-1">Title</label>
     <input v-model="form.title" type="text"
@@ -142,6 +233,7 @@ onBeforeUnmount(() => {
   </div>
 
   <div class="flex justify-end gap-3 pt-4">
+    <button type="button" @click="handleDeleteSong" class="px-4 py-2 text-sm rounded-xl bg-red-600 hover:bg-red-500 transition"> Delete </button>
     <button type="button" @click="closeEdit"
       class="px-4 py-2 text-sm rounded-xl bg-white/10 hover:bg-white/20 transition">
       Cancel

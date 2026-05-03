@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import song from '../assets/songsData.json'
 
 const emit = defineEmits(['play-song'])
@@ -11,61 +11,72 @@ const props = defineProps({
     },
 })
 
+const cards = ref([])
+const cardBackImage = '/Card.png'
+
 const randomizer = (song) => {
     const randomIndex = Math.floor(Math.random() * song.length)
     return song[randomIndex]
 }
 
-const cardBackImage = '/Card.png'
-const Song1 = randomizer(song)
-const Song2 = randomizer(song)
-const Song3 = randomizer(song)
-
-const cards = ref([
-    {
-        id: 1,
-        title: 'Card 1',
-        name: Song1.name,
-        artist: Song1.artist,
-        image: Song1.cover,
-        duration: Song1.duration,
-        flipped: false,
-    },
-    {
-        id: 2,
-        title: 'Card 2',
-        name: Song2.name,
-        artist: Song2.artist,
-        image: Song2.cover,
-        duration: Song2.duration,
-        flipped: false,
-    },
-    {
-        id: 3,
-        title: 'Card 3',
-        name: Song3.name,
-        artist: Song3.artist,
-        image: Song3.cover,
-        duration: Song3.duration,
-        flipped: false,
-    },
-])
+const initCards = () => {
+    const Song1 = randomizer(song)
+    const Song2 = randomizer(song)
+    const Song3 = randomizer(song)
+    
+    if (Song1 === Song2 || Song1 === Song3 || Song2 === Song3) {
+        return initCards()
+    }
+    else {
+        cards.value = [
+            {
+                id: 1,
+                title: 'Card 1',
+                name: Song1.name,
+                artist: Song1.artist,
+                image: Song1.cover,
+                duration: Song1.duration,
+                flipped: false,
+            },
+            {
+                id: 2,
+                title: 'Card 2',
+                name: Song2.name,
+                artist: Song2.artist,
+                image: Song2.cover,
+                duration: Song2.duration,
+                flipped: false,
+            },
+            {
+                id: 3,
+                title: 'Card 3',
+                name: Song3.name,
+                artist: Song3.artist,
+                image: Song3.cover,
+                duration: Song3.duration,
+                flipped: false,
+            },
+        ]
+    }
+}
 
 const toggleCard = (id) => {
     const card = cards.value.find((item) => item.id === id)
 
-    if (card) {
-        card.flipped = !card.flipped
+    if (card && !card.flipped) {
+        card.flipped = true
     }
 }
 
 const playSong = (card) => {
+    const isCurrentlyPlaying = isCardPlaying(card)
+
     emit('play-song', {
         name: card.name,
         artist: card.artist,
         cover: card.image,
         duration: card.duration,
-        isPlaying: true,
+        isPlaying: !isCurrentlyPlaying,
     })
 }
 
@@ -74,6 +85,10 @@ const isCardPlaying = (card) => {
            props.currentTrack.artist === card.artist &&
            props.currentTrack.isPlaying
 }
+
+onMounted(() => {
+    initCards()
+})
 </script>
 
 <template>
@@ -104,7 +119,6 @@ const isCardPlaying = (card) => {
                             <button
                                 type="button"
                                 aria-label="Like"
-                                @click.stop
                                 class="p-5 bg-red-500 rounded-lg text-white font-bold hover:bg-red-600 transition-colors duration-300 hover:scale-105 transition-transform duration-300 cursor-pointer "
                             >
                                 ♥
@@ -112,7 +126,7 @@ const isCardPlaying = (card) => {
                             <button
                                 type="button"
                                 :aria-label="isCardPlaying(card) ? 'Pause' : 'Play'"
-                                @click.stop="playSong(card)"
+                                @click="playSong(card)"
                                 class="p-5 bg-green-500 rounded-lg text-white font-bold hover:bg-green-600 transition-colors duration-300 hover:scale-105 transition-transform duration-300 cursor-pointer"
                             >
                                 {{ isCardPlaying(card) ? '⏸' : '▶' }}
@@ -120,7 +134,6 @@ const isCardPlaying = (card) => {
                             <button
                                 type="button"
                                 aria-label="Add to playlist"
-                                @click.stop
                                 class="p-5 bg-blue-500 rounded-lg text-white font-bold hover:bg-blue-600 transition-colors duration-300 hover:scale-105 transition-transform duration-300 cursor-pointer"
                             >
                                 +

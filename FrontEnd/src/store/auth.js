@@ -15,6 +15,10 @@ export const login = async (email, password) => {
   authState.isAuthenticated = true;
 };
 
+export const register = async (name, email, password) => {
+  await authService.register(name, email, password);
+}
+
 export const initAuth = async () => {
   if (!authState.token) {
     return;

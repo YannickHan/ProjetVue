@@ -2,12 +2,25 @@
     import TrendingArtiste from '../components/TrendingArtiste.vue'
     import MusicList from '../components/MusicList.vue'
     import Playlist from '../components/Playlist.vue'
-    
-    import SongsData from '../assets/songsData.json';
-    import { ref } from 'vue';
+    import { getTrendingSongs } from '../store/Song';
+    import { ref, onMounted } from 'vue';
     import { useRouter } from "vue-router";
 
-    const songs = ref(SongsData);
+    const songs = ref([]);
+
+    const getHighlightedSongs = async () => {
+        try {
+            const data = await getTrendingSongs();
+            songs.value = data;
+            console.log("Fetched trending songs:", songs.value);
+        } catch (error) {
+            console.error("Error fetching trending songs:", error);
+        }
+    };
+
+    onMounted(async () => {
+        await getHighlightedSongs();
+    });
 
     // ----------------------------This handle the routing to artist page ----------------------------
     const router = useRouter();
@@ -20,8 +33,8 @@
             name: payload.artist,
             image: payload.image
         }
-    })
-}
+    });
+};
 </script>
 
 <template>

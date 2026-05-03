@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, watch } from 'vue';
 import Song from './Song.vue';
 
 const props = defineProps({
@@ -17,8 +17,57 @@ const props = defineProps({
 
 const emit = defineEmits(['song-play-state-change']);
 
+const localSongs = ref([]);
+
+watch(
+    () => props.songs,
+    (newSongs) => {
+        localSongs.value = Array.isArray(newSongs) ? [...newSongs] : [];
+    },
+    { immediate: true }
+);
+
 const handleSongPlayStateChange = (payload) => {
     emit('song-play-state-change', payload);
+};
+
+const handleSongDeleted = (payload) => {
+    localSongs.value = localSongs.value.filter((song) => {
+        if (payload?.idSong) {
+            return (song.id ?? song.idSong) !== payload.idSong;
+        }
+        // For static songs with no DB id, remove by visible identity.
+        return !(
+            song.name === payload?.name &&
+            song.artist === payload?.artist &&
+            song.duration === payload?.duration
+        );
+    });
+};
+
+const handleSongUpdated = (payload) => {
+    const matchSong = (song) => {
+        if (payload?.idSong) {
+            return (song.id ?? song.idSong) === payload.idSong;
+        }
+        return (
+            song.name === payload?.oldName &&
+            song.artist === payload?.oldArtist &&
+            song.duration === payload?.oldDuration
+        );
+    };
+
+    localSongs.value = localSongs.value.map((song) => {
+        if (!matchSong(song)) return song;
+        return {
+            ...song,
+            name: payload?.name ?? song.name,
+            artist: payload?.artist ?? song.artist,
+            duration: payload?.duration ?? song.duration,
+            cover: payload?.cover || song.cover,
+            path: payload?.path || song.path,
+        };
+    });
 };
 
 const isSongPlaying = (song) => {
@@ -41,8 +90,9 @@ const isSongPlaying = (song) => {
 
         <section class="m-5">
             <Song 
-                v-for="(song, index) in songs" 
+                v-for="(song, index) in localSongs" 
                 :key="index"
+                :id-song="song.id ?? song.idSong"
                 :name="song.name"
                 :artist="song.artist"
                 :duration="song.duration"
@@ -50,6 +100,8 @@ const isSongPlaying = (song) => {
                 :path="song.path"
                 :is-playing-external="isSongPlaying(song)"
                 @play-state-change="handleSongPlayStateChange"
+                @song-deleted="handleSongDeleted"
+                @song-updated="handleSongUpdated"
             />
         </section>
     </div>

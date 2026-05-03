@@ -87,9 +87,9 @@ const processedSongs = computed(() => {
 
 <template>
   <div>
-    <div class="grid grid-cols-[0.3fr_1fr]">
+    <div class="grid grid-cols-[0.2fr_0.8fr] h-275 w-screen p-4 gap-4">
         <AdminLeftbar :active-view="activeView" @change-view="handleChangeView" />
-        <div class="bg-black rounded-4xl m-4 text-white h-[53rem] flex flex-col overflow-y-auto">
+        <div class="bg-black text-white h-full w-full flex flex-col overflow-y-auto rounded-4xl">
             <div v-if="activeView === 'dashboard'" class="text-2xl font-bold">
               <AdminDashboard/>
               <Footer class="pb-10" />
