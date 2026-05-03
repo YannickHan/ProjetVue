@@ -39,6 +39,19 @@ export const getSongs = async () => {
     return await res.json();
 };
 
+export const getSongsByArtist = async (nameArtist) => {
+    const res = await fetch(`${API_URL}/api/artists/${encodeURIComponent(nameArtist)}/songs`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    if (!res.ok) {
+        throw new Error("Failed to fetch songs by artist");
+    }
+    return await res.json();
+};
+
 export const searchSongsByTitle = async (title) => {
     const params = new URLSearchParams({ title: title || "" });
     const res = await fetch(`${API_URL}/api/songs/search?${params.toString()}`, {

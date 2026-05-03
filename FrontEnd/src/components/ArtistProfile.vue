@@ -1,17 +1,32 @@
 <script setup>
 import MusicList from './MusicList.vue';
 import Playlist from './Playlist.vue';
-import SongsData from '../assets/songsData.json';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
+import { getSongsByArtist } from '../services/SongServices';
 
 const props = defineProps({
     name: String,
     bgCover: String,
     nbFollowers: Number
-});   
+});
 
 const isFollowing = ref(false)
-const songs = ref(SongsData);
+const songs = ref([]);
+
+const loadSongs = async (artistName) => {
+    if (!artistName) {
+        songs.value = [];
+        return;
+    }
+    try {
+        songs.value = await getSongsByArtist(artistName);
+    } catch (error) {
+        console.error('Failed to load artist songs:', error);
+        songs.value = [];
+    }
+};
+
+watch(() => props.name, loadSongs, { immediate: true });
 </script>
 
 <template>

@@ -1,7 +1,10 @@
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount, reactive } from 'vue'
+import { useRouter } from 'vue-router'
 import { authState } from "../store/auth"
 import { updateSong, deleteSong, likeSong, unlikeSong, getUserLikes } from '../services/SongServices'
+
+const router = useRouter()
 
 // ----------------------------This handle the parent----------------------------
 const props = defineProps({
@@ -50,13 +53,19 @@ const saveLikedSongsToStorage = (arr) => {
 }
 
 const toggleLike = async () => {
-  // Optimistic UI
+  // Require login to like a song
+  if (!authState.isAuthenticated) {
+    router.push('/login')
+    return
+  }
+
   const previous = isLiked.value
   isLiked.value = !previous
   const key = computeSongKey()
 
-  // If user is logged in and song has DB id, persist server-side
   const userId = authState.user?.id ?? null
+
+  // Logged in + DB song → server is the source of truth.
   if (userId && props.idSong) {
     try {
       if (!previous) {
@@ -65,23 +74,23 @@ const toggleLike = async () => {
         await unlikeSong(props.idSong, userId)
       }
     } catch (e) {
-      // revert on error and fallback to localStorage
       console.error('Like API error:', e)
       isLiked.value = previous
-      alert('❌ Failed to update like on server; saved locally instead.')
-      // fallback: update local storage below
+      alert('❌ Failed to update like on server.')
+      return
     }
+  } else {
+    // Local/static song without a DB id → use localStorage as fallback.
+    const liked = getLikedSongsFromStorage()
+    if (isLiked.value) {
+      if (!liked.includes(key)) liked.push(key)
+    } else {
+      const idx = liked.indexOf(key)
+      if (idx >= 0) liked.splice(idx, 1)
+    }
+    saveLikedSongsToStorage(liked)
   }
 
-  // Update local storage as a fallback / local cache
-  const liked = getLikedSongsFromStorage()
-  if (isLiked.value) {
-    if (!liked.includes(key)) liked.push(key)
-  } else {
-    const idx = liked.indexOf(key)
-    if (idx >= 0) liked.splice(idx, 1)
-  }
-  saveLikedSongsToStorage(liked)
   emit('like-changed', { key, liked: isLiked.value, idSong: props.idSong || null })
 }
 
@@ -230,24 +239,28 @@ const handleClickOutside = (e) => {
 
 onMounted(async () => {
   document.addEventListener('click', handleClickOutside)
-  // initialize liked state from localStorage
   try {
-    const key = computeSongKey()
-    const liked = getLikedSongsFromStorage()
-    isLiked.value = liked.includes(key)
-
-    // If logged in and song has id, try to fetch server liked state (prefer server)
     const userId = authState.user?.id ?? null
+
+    // Logged in + DB song → server is the source of truth.
     if (userId && props.idSong) {
       try {
         const res = await getUserLikes(userId)
-        if (res && res.likes) {
-          const songId = Number(props.idSong)
-          isLiked.value = res.likes.some(song => Number(song.idSong) === songId) || isLiked.value
-        }
+        const likesArr = res?.likes ?? []
+        const songId = Number(props.idSong)
+        isLiked.value = likesArr.some(song => Number(song.idSong) === songId)
       } catch (e) {
         console.warn('Failed to fetch user likes', e)
+        isLiked.value = false
       }
+    } else if (userId && !props.idSong) {
+      // Logged-in user on a local/static song without DB id → localStorage fallback.
+      const key = computeSongKey()
+      const liked = getLikedSongsFromStorage()
+      isLiked.value = liked.includes(key)
+    } else {
+      // Anonymous: cannot like, never show as liked.
+      isLiked.value = false
     }
   } catch (e) {
     console.warn('Error initializing liked state', e)
@@ -267,7 +280,7 @@ onBeforeUnmount(() => {
         </button>
         
         <!-- Cover Image -->
-        <img :src="cover" alt="Cover Image" class="w-12 sm:w-16 h-12 sm:h-16 rounded-lg mx-auto">
+        <img :src="cover" alt="Cover Image" class="w-12 sm:w-14 md:w-16 aspect-square object-cover rounded-lg mx-auto">
         
         <!-- Name and Artist (mobile: combined, desktop: separate) -->
         <div class="sm:hidden text-left px-2">

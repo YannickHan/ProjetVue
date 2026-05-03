@@ -59,6 +59,37 @@ const searchSongsByTitleHandler = async (req, res) => {
   }
 };
 
+const getSongsByArtistHandler = async (req, res) => {
+  const name = (req.params.nameArtist || '').trim();
+  if (!name) {
+    return res.json([]);
+  }
+
+  try {
+    const [rows] = await pool.query(
+      `
+      SELECT
+        s.idSong AS idSong,
+        s.titleSong AS name,
+        a.nameArtist AS artist,
+        s.durationSong AS duration,
+        s.coverSong AS cover,
+        s.pathSong AS path
+      FROM Song s
+      JOIN ArtistHasSong ahs ON s.idSong = ahs.Song_idSong
+      JOIN Artist a ON a.idArtist = ahs.Artist_idArtist
+      WHERE a.nameArtist = ?
+      ORDER BY s.titleSong ASC
+      `,
+      [name]
+    );
+    res.json(rows);
+  } catch (error) {
+    console.error('GetSongsByArtist error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 const getTrendingArtistsHandler = async (req, res) => {
   try {
     const [rows] = await pool.query(`
@@ -412,6 +443,7 @@ const deleteArtistHandler = async (req, res) => {
 
 module.exports = {
   getSongsHandler,
+  getSongsByArtistHandler,
   searchSongsByTitleHandler,
   getTrendingArtistsHandler,
   getTrendingSongsHandler,

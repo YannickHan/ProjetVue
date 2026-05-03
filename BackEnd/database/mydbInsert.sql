@@ -1,4 +1,16 @@
-INSERT INTO `artist` VALUES 
+USE `mydb`;
+
+-- ========================================
+-- SEED DATA
+-- ========================================
+-- Note : les playlists "Liked" sont créées automatiquement
+-- par le trigger trg_User_AfterInsert lors de l'INSERT des users.
+-- Ne PAS insérer manuellement de playlist 'Liked' ici.
+
+-- ----------------------------------------
+-- ARTISTS
+-- ----------------------------------------
+INSERT INTO `artist` VALUES
 (1,'Ado',0,NULL,NULL,NULL),
 (2,'Joji',0,NULL,NULL,NULL),
 (3,'Harry Styles',0,NULL,NULL,NULL),
@@ -20,24 +32,30 @@ INSERT INTO `artist` VALUES
 (19,'Billie Eilish',0,NULL,NULL,'https://wallpapercat.com/w/small-vertical-retina/f/4/3/11705-1920x2688-phone-hd-billie-eilish-background-photo.jpg?id=1644840023'),
 (20,'Sabrina Carpenter',1,NULL,NULL,'https://wallpapercave.com/wp/wp15388514.jpg');
 
+-- ----------------------------------------
+-- SONGS (7 colonnes : id, title, release, duration, cover, highlighted, path)
+-- ----------------------------------------
 INSERT INTO `song` VALUES
-(1,'Mirror','2022-01-01','03:45:00','https://m.media-amazon.com/images/I/81yRZl5LtRL.jpg',1,NULL,'music/mirror.mp3'),
-(2,'Glimpse of Us','2022-06-10','03:53:00','https://m.media-amazon.com/images/I/81lqJcDPfZL.jpg',1,NULL,'music/glimpse-of-us.mp3'),
-(3,'As It Was','2022-04-01','02:47:00','https://m.media-amazon.com/images/I/61RyXmXm5fL.jpg',1,NULL,'music/as-it-was.mp3'),
-(4,'Bad Habit','2022-07-29','03:52:00','https://m.media-amazon.com/images/I/81gt2TIexbL.jpg',0,NULL,'music/bad-habit.mp3'),
-(5,'Unholy','2022-09-22','02:36:00','https://m.media-amazon.com/images/I/61aZhNW9Q0L.jpg',1,NULL,'music/unholy.mp3'),
-(6,'Blinding Lights','2020-11-29','03:20:00','https://m.media-amazon.com/images/I/717Ypd1t7IL.jpg',1,NULL,'music/blinding-lights.mp3'),
-(7,'Heat Waves','2020-06-29','03:58:00','https://m.media-amazon.com/images/I/81vMxIyDZ9L.jpg',0,NULL,'music/heat-waves.mp3'),
-(8,'Uptown Funk','2014-11-10','04:30:00','https://m.media-amazon.com/images/I/71AZUM4CY1L.jpg',0,NULL,'music/uptown-funk.mp3'),
-(9,'Levitating','2020-10-01','03:23:00','https://m.media-amazon.com/images/I/81dhBdiI4+L.jpg',1,NULL,'music/levitating.mp3'),
-(10,'Peaches','2021-03-19','03:18:00','https://m.media-amazon.com/images/I/81lleqz5QXL.jpg',0,NULL,'music/peaches.mp3'),
-(11,'Good 4 U','2021-05-14','02:58:00','https://m.media-amazon.com/images/I/61fin73zyhL.jpg',0,NULL,'music/good-4-u.mp3'),
-(12,'Sunroof','2022-01-21','02:52:00','https://m.media-amazon.com/images/I/71DdC823BZL.jpg',0,NULL,'music/sunroof.mp3'),
-(13,'Anti-Hero','2022-10-21','03:21:00','https://m.media-amazon.com/images/I/81sD+kAZAFL.jpg',1,NULL,'music/anti-hero.mp3'),
-(14,'Shape of You','2017-01-06','03:53:00','https://m.media-amazon.com/images/I/B1TlPSY5bKS.jpg',0,NULL,'music/shape-of-you.mp3'),
-(15,'Starboy','2016-09-22','03:50:00','https://m.media-amazon.com/images/I/71fIuxvP+FL.jpg',0,NULL,'music/starboy.mp3'),
-(16,'Kiss Me More','2021-04-09','03:28:00','https://m.media-amazon.com/images/I/71xVNFRJBsL.jpg',1,NULL,'music/kiss-me-more.mp3');
+(1,'Mirror','2022-01-01','00:03:45','https://m.media-amazon.com/images/I/81yRZl5LtRL.jpg',1,'music/mirror.mp3'),
+(2,'Glimpse of Us','2022-06-10','00:03:53','https://m.media-amazon.com/images/I/81lqJcDPfZL.jpg',1,'music/glimpse-of-us.mp3'),
+(3,'As It Was','2022-04-01','00:02:47','https://m.media-amazon.com/images/I/61RyXmXm5fL.jpg',1,'music/as-it-was.mp3'),
+(4,'Bad Habit','2022-07-29','00:03:52','https://m.media-amazon.com/images/I/81gt2TIexbL.jpg',0,'music/bad-habit.mp3'),
+(5,'Unholy','2022-09-22','00:02:36','https://m.media-amazon.com/images/I/61aZhNW9Q0L.jpg',1,'music/unholy.mp3'),
+(6,'Blinding Lights','2020-11-29','00:03:20','https://m.media-amazon.com/images/I/717Ypd1t7IL.jpg',1,'music/blinding-lights.mp3'),
+(7,'Heat Waves','2020-06-29','00:03:58','https://m.media-amazon.com/images/I/81vMxIyDZ9L.jpg',0,'music/heat-waves.mp3'),
+(8,'Uptown Funk','2014-11-10','00:04:30','https://m.media-amazon.com/images/I/71AZUM4CY1L.jpg',0,'music/uptown-funk.mp3'),
+(9,'Levitating','2020-10-01','00:03:23','https://m.media-amazon.com/images/I/81dhBdiI4+L.jpg',1,'music/levitating.mp3'),
+(10,'Peaches','2021-03-19','00:03:18','https://m.media-amazon.com/images/I/81lleqz5QXL.jpg',0,'music/peaches.mp3'),
+(11,'Good 4 U','2021-05-14','00:02:58','https://m.media-amazon.com/images/I/61fin73zyhL.jpg',0,'music/good-4-u.mp3'),
+(12,'Sunroof','2022-01-21','00:02:52','https://m.media-amazon.com/images/I/71DdC823BZL.jpg',0,'music/sunroof.mp3'),
+(13,'Anti-Hero','2022-10-21','00:03:21','https://m.media-amazon.com/images/I/81sD+kAZAFL.jpg',1,'music/anti-hero.mp3'),
+(14,'Shape of You','2017-01-06','00:03:53','https://m.media-amazon.com/images/I/B1TlPSY5bKS.jpg',0,'music/shape-of-you.mp3'),
+(15,'Starboy','2016-09-22','00:03:50','https://m.media-amazon.com/images/I/71fIuxvP+FL.jpg',0,'music/starboy.mp3'),
+(16,'Kiss Me More','2021-04-09','00:03:28','https://m.media-amazon.com/images/I/71xVNFRJBsL.jpg',1,'music/kiss-me-more.mp3');
 
+-- ----------------------------------------
+-- ARTIST <-> SONG associations
+-- ----------------------------------------
 INSERT INTO `artisthassong` VALUES
 (1,1),
 (2,2),
@@ -56,10 +74,9 @@ INSERT INTO `artisthassong` VALUES
 (6,15),
 (15,16);
 
+-- ----------------------------------------
+-- USERS (déclenche automatiquement la création des playlists "Liked")
+-- ----------------------------------------
 INSERT INTO `user` VALUES
 (1,'Admin','admin@phantomwaves.com',NULL,'$12$8POvDZ9DcFgArdiGHEuXweg4nWpJP0369eJeZ00MqyIsjxHnT1hBe',1),
 (2,'User','user@user.com',NULL,'$2b$10$5wPzQ7XJYNfvI3bRYHjALOSv6c9F2GhTFi4sSgAQKWqXg3rG/8.PG',0);
-
-INSERT INTO `playlist` VALUES
-(1,'Liked','2026-04-20',0,1),
-(2,'Liked','2026-04-20',0,2);
