@@ -26,6 +26,9 @@ export const login = async (email, password) => {
   const data = await res.json();
 
   localStorage.setItem("token", data.token);
+  if (data.user) {
+    localStorage.setItem("user", JSON.stringify(data.user));
+  }
 
   return data;
 };
@@ -58,10 +61,20 @@ export const register = async (name, email, password) => {
 
 export const logout = () => {
   localStorage.removeItem("token");
+  localStorage.removeItem("user");
 };
 
 export const getToken = () => {
   return localStorage.getItem("token");
+};
+
+export const getStoredUser = () => {
+  try {
+    const raw = localStorage.getItem("user");
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
 };
 
 // Exemple requête protégée

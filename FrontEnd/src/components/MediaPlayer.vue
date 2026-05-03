@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 
 const emit = defineEmits(['toggle-play', 'next-song', 'prev-song']);
 
@@ -24,6 +24,10 @@ const props = defineProps({
         type: String,
         default: '',
     },
+    trackPath: {
+        type: String,
+        default: '',
+    },
 });
 
 const handleTogglePlay = () => {
@@ -38,32 +42,40 @@ const handlePrevSong = () => {
     emit('prev-song');
 };
 
-// ----------------------------This handle the timer for the progress bar----------------------------
+// ----------------------------This handle the audio element and progress bar----------------------------
+const BACKEND_STATIC_URL = 'http://localhost:3000/static/';
+
+const audioRef = ref(null);
 const elapsedSeconds = ref(0);
-const intervalId = ref(null);
+const audioDurationSeconds = ref(0);
 
-// Convertit une durée au format "mm:ss" en secondes
+// Résout un chemin de piste relatif (ex: "music/foo.mp3") en URL servie par le backend.
+const resolvedAudioUrl = computed(() => {
+    const path = props.trackPath;
+    if (!path) return '';
+    if (/^https?:\/\//i.test(path)) return path;
+    return `${BACKEND_STATIC_URL}${path.replace(/^\/+/, '')}`;
+});
+
+// Convertit une durée au format "hh:mm:ss" ou "mm:ss" en secondes (fallback si l'audio n'a pas chargé).
 const toSeconds = (value) => {
-    const [minutes, seconds] = String(value || '').split(':').map(Number);
-
-    if (Number.isNaN(minutes) || Number.isNaN(seconds)) {
-        return 0;
-    }
-
-    return (minutes * 60) + seconds;
+    const parts = String(value || '').split(':').map(Number);
+    if (parts.some(Number.isNaN)) return 0;
+    if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    if (parts.length === 2) return parts[0] * 60 + parts[1];
+    return parts[0] || 0;
 };
 
 // Formate une durée en secondes au format "mm:ss"
 const formatTime = (total) => {
-    const safeTotal = Math.max(0, Number(total) || 0);
+    const safeTotal = Math.max(0, Math.floor(Number(total) || 0));
     const minutes = Math.floor(safeTotal / 60);
     const seconds = safeTotal % 60;
 
     return `${minutes}:${String(seconds).padStart(2, '0')}`;
 };
 
-// Calcule les valeurs pour l'affichage du temps écoulé et du pourcentage de progression
-const totalSeconds = computed(() => toSeconds(props.trackDuration));
+const totalSeconds = computed(() => audioDurationSeconds.value || toSeconds(props.trackDuration));
 const displayedElapsed = computed(() => formatTime(elapsedSeconds.value));
 const progressPercent = computed(() => {
     if (!totalSeconds.value) return 0;
@@ -71,58 +83,61 @@ const progressPercent = computed(() => {
     return Math.min((elapsedSeconds.value / totalSeconds.value) * 100, 100);
 });
 
-//arrêter le timer quand la chanson est terminée ou quand une nouvelle chanson est sélectionnée
-const stopTimer = () => {
-    if (!intervalId.value) return;
-
-    clearInterval(intervalId.value);
-    intervalId.value = null;
+const onTimeUpdate = () => {
+    if (!audioRef.value) return;
+    elapsedSeconds.value = audioRef.value.currentTime || 0;
 };
 
-// Démarrer le timer pour suivre la progression de la chanson
-const startTimer = () => {
-    if (intervalId.value || !props.isPlaying || !totalSeconds.value) return;
-
-    intervalId.value = setInterval(() => {
-        if (elapsedSeconds.value >= totalSeconds.value) {
-            stopTimer();
-            return;
-        }
-
-        elapsedSeconds.value += 1;
-    }, 1000);
+const onLoadedMetadata = () => {
+    if (!audioRef.value) return;
+    audioDurationSeconds.value = Number.isFinite(audioRef.value.duration) ? audioRef.value.duration : 0;
 };
 
-// Surveiller les changements de lecture et de piste pour démarrer/arrêter le timer en conséquence
+const onEnded = () => {
+    elapsedSeconds.value = 0;
+    emit('next-song');
+};
+
+const playAudio = () => {
+    if (!audioRef.value || !resolvedAudioUrl.value) return;
+    const result = audioRef.value.play();
+    if (result && typeof result.catch === 'function') {
+        result.catch((err) => {
+            console.warn('Audio playback failed:', err);
+        });
+    }
+};
+
+// Lorsque la piste change, on remet le compteur à zéro et on relance la lecture si nécessaire.
+watch(
+    () => resolvedAudioUrl.value,
+    () => {
+        elapsedSeconds.value = 0;
+        audioDurationSeconds.value = 0;
+        nextTick(() => {
+            if (props.isPlaying) playAudio();
+        });
+    }
+);
+
+// Lecture / pause selon l'état parent.
 watch(
     () => props.isPlaying,
     (playing) => {
-        if (!playing) {
-            stopTimer();
-            return;
+        if (!audioRef.value) return;
+        if (playing) {
+            playAudio();
+        } else {
+            audioRef.value.pause();
         }
-
-        startTimer();
     },
     { immediate: true }
 );
 
-// Réinitialiser le timer lorsque la piste change
-watch(
-    () => [props.trackName, props.trackArtist, props.trackDuration],
-    () => {
-        stopTimer();
-        elapsedSeconds.value = 0;
-
-        if (props.isPlaying) {
-            startTimer();
-        }
-    }
-);
-
-// Nettoyer le timer lorsque le composant est détruit pour éviter les fuites de mémoire
 onBeforeUnmount(() => {
-    stopTimer();
+    if (audioRef.value) {
+        audioRef.value.pause();
+    }
 });
 </script>
 
@@ -168,6 +183,15 @@ onBeforeUnmount(() => {
         <div class="absolute bottom-0 left-0 w-full h-1 bg-gray-300 rounded-b-4xl">
             <div class="h-full bg-yellow-500 rounded-b-4xl" :style="{ width: `${progressPercent}%` }"></div>
         </div>
+        <audio
+            ref="audioRef"
+            :src="resolvedAudioUrl"
+            preload="metadata"
+            class="hidden"
+            @timeupdate="onTimeUpdate"
+            @loadedmetadata="onLoadedMetadata"
+            @ended="onEnded"
+        ></audio>
     </div>
 </template>
 

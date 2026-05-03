@@ -13,6 +13,7 @@ const props = defineProps({
   artist: String,
   duration: String,
   cover: String,
+  path: String,
   isPlayingExternal: {
     type: Boolean,
     default: false,
@@ -94,16 +95,17 @@ const toggleLike = async () => {
   emit('like-changed', { key, liked: isLiked.value, idSong: props.idSong || null })
 }
 
-const togglePlay = () => { 
-  isPlaying.value = !isPlaying.value 
-  emit('play-state-change', { 
-    isPlaying: isPlaying.value, 
-    name: props.name, 
-    artist: props.artist, 
-    duration: props.duration, 
-    cover: props.cover, 
-  }) 
-} 
+const togglePlay = () => {
+  isPlaying.value = !isPlaying.value
+  emit('play-state-change', {
+    isPlaying: isPlaying.value,
+    name: props.name,
+    artist: props.artist,
+    duration: props.duration,
+    cover: props.cover,
+    path: props.path,
+  })
+}
 // ----------------------------This handle the mediaplayer---------------------------- 
 watch( 
   () => props.isPlayingExternal, 
