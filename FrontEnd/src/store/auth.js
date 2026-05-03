@@ -2,7 +2,7 @@ import { reactive } from "vue";
 import * as authService from "../services/authService";
 
 export const authState = reactive({
-  user: null,
+  user: authService.getStoredUser(),
   token: authService.getToken(),
   isAuthenticated: !!authService.getToken(),
 });
@@ -19,14 +19,15 @@ export const register = async (name, email, password) => {
   await authService.register(name, email, password);
 }
 
+// L'utilisateur est restauré de manière synchrone depuis localStorage à la création
+// de authState, donc initAuth n'a plus besoin de récupérer le profil au démarrage.
 export const initAuth = async () => {
   if (!authState.token) {
+    logout();
     return;
   }
-
-  try {
-    await fetchProfile();
-  } catch {
+  // Si le token existe mais qu'on n'a pas le user (ex: ancien storage), purger.
+  if (!authState.user) {
     logout();
   }
 };

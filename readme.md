@@ -1,5 +1,15 @@
 # 🌊 PhantomWaves
+# 🌊 PhantomWaves
 
+## 📖 Description
+
+**PhantomWaves** is a web development project built using **HTML, CSS, and JavaScript**, featuring a modular architecture with a Node.js backend and a dynamic frontend.
+
+---
+
+## 🚀 Getting Started
+
+### 📥 Clone the repository
 ## 📖 Description
 
 **PhantomWaves** is a web development project built using **HTML, CSS, and JavaScript**, featuring a modular architecture with a Node.js backend and a dynamic frontend.
@@ -18,11 +28,22 @@ cd phantomwaves
 ---
 
 ## 📦 Installation & Launch
+---
+
+## 📦 Installation & Launch
 
 ```bash
 npm run install
 npm run dev
+npm run install
+npm run dev
 ```
+
+---
+
+## ⚙️ Available Commands
+
+### 🧪 Development
 
 ---
 
@@ -34,7 +55,12 @@ npm run dev
 npm run install      # Install dependencies
 npm run start        # Start development server
 npm run dev          # Run development mode
+npm run install      # Install dependencies
+npm run start        # Start development server
+npm run dev          # Run development mode
 ```
+
+### 🏗️ Build
 
 ### 🏗️ Build
 
@@ -51,12 +77,23 @@ npm run clean    # Remove build artifacts
 
 ### ✅ Testing
 
+### 🧹 Cleanup
+
+```bash
+npm run clean    # Remove build artifacts
+```
+
+### ✅ Testing
+
 ```bash
 npm test         # Run tests
 npm run lint     # Lint code
 ```
 
 ---
+---
+
+## 📁 Project Structure
 
 ## 📁 Project Structure
 
@@ -64,10 +101,31 @@ npm run lint     # Lint code
 phantomwaves/
 ├── Backend/
 ├── Frontend/
+├── Backend/
+├── Frontend/
 ```
 
 ---
 
+---
+
+## 🖥️ Usage
+
+Open `index.html` in your browser or run the development server for a better experience.
+
+---
+
+## ✨ Features
+
+* 🔐 Login system
+* 🚪 Logout & page restriction
+* 🎵 Web player integrated in the navbar
+
+---
+
+## 🗄️ MySQL Integration
+
+### 1. Install dependencies
 ## 🖥️ Usage
 
 Open `index.html` in your browser or run the development server for a better experience.
@@ -89,16 +147,22 @@ Open `index.html` in your browser or run the development server for a better exp
 ```bash
 cd server
 npm install mysql2
+npm install mysql2
 ```
 
 ---
+---
 
+### 2. Setup database connection
 ### 2. Setup database connection
 
 Update your `server/index.js`:
+Update your `server/index.js`:
 
 ```js
+```js
 const express = require('express');
+const mysql = require('mysql2');
 const mysql = require('mysql2');
 const cors = require('cors');
 
@@ -164,7 +228,66 @@ const updateSongHandler = async (req, res) => {
   }
 };
 
+// MySQL connection
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '', // ← replace with your password
+  database: 'phantomwaves_db'
+});
 
+db.connect(err => {
+  if (err) {
+    console.error('❌ MySQL connection error:', err);
+    return;
+  }
+  console.log('✅ Connected to MySQL');
+});
+
+// Get all items
+const getTrendingSongsHandler = async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT s.idSong AS idSong, s.titleSong, s.durationSong, s.coverSong, pathSong, a.nameArtist FROM song s
+      INNER JOIN artisthassong ahs ON ahs.song_idSong = s.idSong
+      LEFT JOIN artist a ON ahs.artist_idArtist = a.idArtist
+      WHERE highlightedSong = 1;
+    `);
+    res.json(rows);
+  } catch (error) {
+    console.error('GetTrendingSongs error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Add new item
+const updateSongHandler = async (req, res) => {
+  const { idSong } = req.params;
+  const { title, release, duration, cover, mp3Url } = req.body;
+
+  if (!title) {
+    return res.status(400).json({ success: false, message: 'Title is required' });
+  }
+
+  try {
+    const [result] = await pool.query(
+      'UPDATE Song SET titleSong = ?, releaseSong = ?, durationSong = ?, coverSong = ?, pathSong = ? WHERE idSong = ?',
+      [title, release || null, duration || null, cover || null, mp3Url || null, idSong]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'Song not found' });
+    }
+
+    res.json({ success: true, message: 'Song updated successfully' });
+  } catch (error) {
+    console.error('UpdateSong error:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};
+
+
+app.listen(3000, () => console.log('🚀 Server running on port 3000'));
 app.listen(3000, () => console.log('🚀 Server running on port 3000'));
 ```
 
@@ -202,12 +325,48 @@ For scalability and clean code:
 ---
 
 ## 🔌 Example Usage in Vue.js
+---
 
+### 3. Example Database
+
+Create your database and table:
+
+```sql
+CREATE DATABASE IF NOT EXISTS `mydb`;
+USE `mydb`;
+
+CREATE TABLE `artist` (
+  `idArtist` int NOT NULL AUTO_INCREMENT,
+  `nameArtist` varchar(45) NOT NULL,
+  `highlightedArtist` tinyint(1) NOT NULL,
+  `horizontalBannerArtist` varchar(255) DEFAULT NULL,
+  `verticalBannerArtist` varchar(255) DEFAULT NULL,
+  `profileArtist` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`idArtist`)
+) ENGINE=InnoDB;
+```
+
+---
+
+## 🏗️ Recommended Architecture
+
+For scalability and clean code:
+
+* **Models/** → Database queries / schema abstraction
+* **Routes/** → API endpoints
+* **Controllers/** → Business logic
+
+---
+
+## 🔌 Example Usage in Vue.js
+
+```js
 ```js
 const addItem = async (name) => {
   await fetch('/api/items', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name })
     body: JSON.stringify({ name })
   });
 };

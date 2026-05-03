@@ -130,6 +130,15 @@ const currentTrack = ref({
     path: '',
 });
 
+const buildTrackFromSong = (song, isPlaying = true) => ({
+    isPlaying,
+    name: song?.name ?? '',
+    artist: song?.artist ?? '',
+    cover: song?.cover ?? '',
+    duration: song?.duration ?? '',
+    path: song?.path ?? '',
+});
+
 const currentSongIndex = ref(-1);
 
 const handleSongPlayStateChange = (payload) => {
@@ -161,33 +170,19 @@ const handleMediaPlayerNext = () => {
     }
     
     currentSongIndex.value = nextIndex;
-    const nextSong = allSongs.value[nextIndex];
-    currentTrack.value = {
-        isPlaying: true,
-        name: nextSong.name,
-        artist: nextSong.artist,
-        cover: nextSong.cover,
-        duration: nextSong.duration,
-    };
+    currentTrack.value = buildTrackFromSong(allSongs.value[nextIndex], true);
 };
 
 const handleMediaPlayerPrevious = () => {
     if (allSongs.value.length === 0) return;
-    
+
     let prevIndex = currentSongIndex.value - 1;
     if (prevIndex < 0) {
         prevIndex = allSongs.value.length - 1; // Loop back to last song
     }
-    
+
     currentSongIndex.value = prevIndex;
-    const prevSong = allSongs.value[prevIndex];
-    currentTrack.value = {
-        isPlaying: true,
-        name: prevSong.name,
-        artist: prevSong.artist,
-        cover: prevSong.cover,
-        duration: prevSong.duration,
-    };
+    currentTrack.value = buildTrackFromSong(allSongs.value[prevIndex], true);
 };
 
 const handleLikeChanged = async () => {
@@ -268,6 +263,7 @@ onUnmounted(() => {
         :track-artist="currentTrack.artist"
         :track-duration="currentTrack.duration"
         :track-cover="currentTrack.cover"
+        :track-path="currentTrack.path"
         @toggle-play="handleMediaPlayerTogglePlay"
         @next-song="handleMediaPlayerNext"
         @prev-song="handleMediaPlayerPrevious"
