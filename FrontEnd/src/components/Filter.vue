@@ -81,7 +81,7 @@ onBeforeUnmount(() => {
       </span>
     </button>
 
-    <div v-if="hasActiveFilters" class="mt-6 w-[44.5em] flex flex-wrap gap-2 p-2 rounded-xl border border-gray-700">
+    <div v-if="hasActiveFilters" class="mt-6 w-[66em] flex flex-wrap gap-2 p-2 rounded-xl border border-gray-700">
       <span v-for="a in filters.artists":key="a"
         class="px-3 py-1 text-xs rounded-full bg-white text-black flex items-center gap-2 cursor-pointer">
         {{ a }}
@@ -91,7 +91,7 @@ onBeforeUnmount(() => {
     </div>
 
     <transition name="fade">
-      <div v-if="isOpen" class="absolute left-0 mt-3 w-[44.5em] bg-black/80 border border-green-500 rounded-2xl p-4 z-50">
+      <div v-if="isOpen" class="absolute left-0 mt-3 w-[66em] bg-black/80 border border-green-500 rounded-2xl p-4 z-50">
         <p class="font-bold text-green-500 text-sm mb-3">Artists</p>
         <div class="flex flex-wrap gap-2">
           <label v-for="a in artists":key="a"

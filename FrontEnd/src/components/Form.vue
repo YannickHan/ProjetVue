@@ -44,7 +44,7 @@ const closeSignupModal = () => {
 const handleSignup = async () => {
   try {
     await register(signupUsername.value, signupEmail.value, signupPassword.value);
-    alert("Inscription réussie");
+    alert("Registration successful");
     closeSignupModal();
   } catch (e) {
     alert(e.message || "Registration failed");
@@ -118,7 +118,7 @@ const handleContactSubmit = async (e) => {
           </div>
 
           <form @submit.prevent="handleSignup" class="flex flex-col gap-3">
-            <label for="signup-email" class="text-sm font-semibold text-gray-700">Adresse mail</label>
+            <label for="signup-email" class="text-sm font-semibold text-gray-700">Email address</label>
             <input
               id="signup-email"
               v-model="signupEmail"
@@ -127,7 +127,7 @@ const handleContactSubmit = async (e) => {
               class="rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#23a517]"
             >
 
-            <label for="signup-username" class="text-sm font-semibold text-gray-700">Nom d'utilisateur</label>
+            <label for="signup-username" class="text-sm font-semibold text-gray-700">Username</label>
             <input
               id="signup-username"
               v-model="signupUsername"
@@ -136,7 +136,7 @@ const handleContactSubmit = async (e) => {
               class="rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#23a517]"
             >
 
-            <label for="signup-password" class="text-sm font-semibold text-gray-700">Mot de passe</label>
+            <label for="signup-password" class="text-sm font-semibold text-gray-700">Password</label>
             <input
               id="signup-password"
               v-model="signupPassword"
@@ -149,7 +149,7 @@ const handleContactSubmit = async (e) => {
               type="submit"
               class="mt-2 rounded-2xl bg-[#23a517] px-4 py-2 font-bold text-black hover:bg-[#1e8e12]"
             >
-              Creer un compte
+              Create account
             </button>
           </form>
         </div>

@@ -19,14 +19,14 @@ export const register = async (name, email, password) => {
   await authService.register(name, email, password);
 }
 
-// L'utilisateur est restauré de manière synchrone depuis localStorage à la création
-// de authState, donc initAuth n'a plus besoin de récupérer le profil au démarrage.
+// The user is restored synchronously from localStorage at creation
+// of authState, so initAuth no longer needs to fetch the profile at startup.
 export const initAuth = async () => {
   if (!authState.token) {
     logout();
     return;
   }
-  // Si le token existe mais qu'on n'a pas le user (ex: ancien storage), purger.
+  // If the token exists but we don't have the user (e.g., old storage), clear it.
   if (!authState.user) {
     logout();
   }

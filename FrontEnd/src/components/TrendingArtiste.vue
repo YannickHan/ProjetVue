@@ -1,13 +1,14 @@
 <script setup>
-import { ref, computed, onMounted} from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from "vue-router";
 import { authState } from "../store/auth";
-import { getTrendingArtists } from "../store/song";
+import { getTrendingArtists, getArtists } from "../store/Song";
 
 
 const router = useRouter();
 const props = defineProps(['type']);
 const highlightedArtists = ref([]);
+const defaultArtists = ref([]);
 
 const getHighlightedArtists = async () => {
     try {
@@ -18,17 +19,13 @@ const getHighlightedArtists = async () => {
     }
 }
 
-const getArtistByName = (name) => {
-    if (!name || !highlightedArtists.value) return null;
-    return highlightedArtists.value.find(a => {
-        if (!a) return false;
-        return a.nameArtist === name || a.name === name;
-    }) || null;
-};
-
-const getArtistImageByName = (name) => {
-    const artist = getArtistByName(name);
-    return artist?.profileArtist || '';
+const shuffleArray = (items) => {
+    const array = [...items];
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
 };
 
 const getArtistName = (artist) => {
@@ -36,17 +33,38 @@ const getArtistName = (artist) => {
     return typeof artist === 'string' ? artist : (artist.nameArtist || artist.name || '');
 };
 
-const getShuffledArtists = () => {
-    const source = Array.isArray(highlightedArtists.value) ? highlightedArtists.value : [];
-    const artists = [...source];
-    for (let i = artists.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [artists[i], artists[j]] = [artists[j], artists[i]];
+const loadDefaultArtists = async () => {
+    try {
+        const data = await getArtists();
+        const artists = Array.isArray(data) ? data : [];
+        defaultArtists.value = shuffleArray(artists).filter((artist) => getArtistName(artist)).slice(0, 3);
+    } catch (error) {
+        console.error('Error fetching artists:', error);
+        defaultArtists.value = [];
     }
+};
 
-    const entries = artists.map(artist => {
-        const name = typeof artist === 'string' ? artist : (artist.nameArtist || artist.name || '');
-        const image = typeof artist === 'string' ? '' : (artist.profileArtist || '');
+const getArtistByName = (name) => {
+    if (!name) return null;
+    const source = [...defaultArtists.value, ...highlightedArtists.value];
+    return source.find((artist) => getArtistName(artist) === name) || null;
+};
+
+const getArtistCardImageByName = (name) => {
+    const artist = getArtistByName(name);
+    return artist?.verticalBannerArtist || artist?.profileArtist || '';
+};
+
+const getArtistCoverImageByName = (name) => {
+    const artist = getArtistByName(name);
+    return artist?.horizontalBannerArtist || '';
+};
+
+const getShuffledArtists = () => {
+    const artists = shuffleArray(highlightedArtists.value);
+    const entries = artists.map((artist) => {
+        const name = getArtistName(artist);
+        const image = artist?.profileArtist || '';
         return [name, image];
     });
     return Object.fromEntries(entries);
@@ -68,7 +86,7 @@ const handleClick = (artist) => {
     const payload = {
         view: 'artist',
         name: artist,
-        image: getArtistImageByName(artist)
+        image: getArtistCoverImageByName(artist)
     };
 
   if (props.type === 'default' && !authState?.isAuthenticated) {
@@ -85,6 +103,7 @@ const handleClick = (artist) => {
 
 onMounted(() => {
     getHighlightedArtists();
+    loadDefaultArtists();
 });
 </script>
 
@@ -93,12 +112,12 @@ onMounted(() => {
         <h2 class="text-center font-bold text-4xl sm:text-9xl m-4 sm:m-10 sm:mb-20 mb-8">Trending Artists</h2>
         <section class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-6 mt-4 text-center text-lg">
             <div
-                v-for="(artist, index) in highlightedArtists.slice(0, 3)"
+                v-for="(artist, index) in defaultArtists"
                 :key="getArtistName(artist) || index"
                 @click="handleClick(getArtistName(artist))"
                 class="bg-[#1a1a1a] rounded-2xl sm:rounded-4xl p-3 sm:p-4 bg-cover bg-center hover:scale-105 transition-transform duration-300 cursor-pointer"
                 :class="index === 1 ? 'h-40 sm:h-[72rem]' : 'h-40 sm:h-[65rem] sm:self-end'"
-                :style="{ backgroundImage: `url(${getArtistImageByName(getArtistName(artist))})` }"
+                :style="{ backgroundImage: `url(${getArtistCardImageByName(getArtistName(artist))})` }"
             >
                 <h3 class="font-bold text-lg sm:text-4xl m-2 sm:m-5">{{ getArtistName(artist) }}</h3>
             </div>

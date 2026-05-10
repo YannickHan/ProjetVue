@@ -8,6 +8,7 @@ DROP TABLE IF EXISTS `playlisthassong`;
 DROP TABLE IF EXISTS `artisthassong`;
 DROP TABLE IF EXISTS `playlist`;
 DROP TABLE IF EXISTS `song`;
+DROP TABLE IF EXISTS `genre`;
 DROP TABLE IF EXISTS `artist`;
 DROP TABLE IF EXISTS `user`;
 DROP TABLE IF EXISTS `sav`;
@@ -44,14 +45,24 @@ CREATE TABLE `song` (
   `durationSong` time NOT NULL,
   `coverSong` varchar(500) DEFAULT NULL,
   `highlightedSong` tinyint(1) NOT NULL,
+  `idGenre` int DEFAULT NULL,
   `pathSong` varchar(255) NOT NULL,
-  PRIMARY KEY (`idSong`)
+  PRIMARY KEY (`idSong`),
+  KEY `fk_Song_Genre_idx` (`idGenre`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `genre` (
+  `idGenre` int NOT NULL AUTO_INCREMENT,
+  `nameGenre` varchar(100) NOT NULL,
+  `descriptionGenre` varchar(1000) NOT NULL,
+  PRIMARY KEY (`idGenre`)
 ) ENGINE=InnoDB;
 
 CREATE TABLE `playlist` (
   `idPlaylist` int NOT NULL AUTO_INCREMENT,
   `namePlaylist` varchar(45) NOT NULL,
   `highlightedPlaylist` tinyint(1) NOT NULL,
+  `coverPlaylist` varchar(500) DEFAULT NULL,
   `User_idUser` int DEFAULT NULL,
   PRIMARY KEY (`idPlaylist`),
   KEY `fk_Playlist_User_idx` (`User_idUser`),
@@ -96,11 +107,14 @@ CREATE TABLE `playlisthassong` (
     FOREIGN KEY (`Song_idSong`) REFERENCES `song` (`idSong`)
 ) ENGINE=InnoDB;
 
+ALTER TABLE `song`
+  ADD CONSTRAINT `fk_Song_Genre`
+  FOREIGN KEY (`idGenre`) REFERENCES `genre` (`idGenre`);
+
 -- ========================================
 -- CREATE TRIGGERS
 -- ========================================
 
--- Empêche un utilisateur d'avoir plusieurs playlists "Liked"
 DELIMITER ;;
 CREATE TRIGGER `trg_Playlist_BeforeInsert`
 BEFORE INSERT ON `playlist`
@@ -112,12 +126,12 @@ BEGIN
           AND namePlaylist = 'Liked'
     ) > 0 THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Cet utilisateur possède déjà une playlist Liked.';
+            SET MESSAGE_TEXT = 'This user already has a Liked playlist.';
     END IF;
 END;;
 DELIMITER ;
 
--- Crée automatiquement une playlist "Liked" à la création d'un utilisateur
+-- Automatically creates a 'Liked' playlist when creating a user
 DELIMITER ;;
 CREATE TRIGGER `trg_User_AfterInsert`
 AFTER INSERT ON `user`

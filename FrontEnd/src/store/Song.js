@@ -29,6 +29,23 @@ export const getSongs = async () => {
     return data;
 }
 
+export const getGenres = async () => {
+    const data = await songServices.getGenres();
+    return data.map((genre) => ({
+        id: genre?.id ?? genre?.idGenre ?? null,
+        idGenre: genre?.idGenre ?? genre?.id ?? null,
+        name: genre?.name ?? genre?.nameGenre ?? '',
+        description: genre?.description ?? genre?.descriptionGenre ?? '',
+        examples: Array.isArray(genre?.examples)
+            ? genre.examples.map((song) => ({
+                idSong: song?.idSong ?? null,
+                title: song?.title ?? '',
+                artist: song?.artist ?? 'Unknown artist',
+            }))
+            : [],
+    }));
+}
+
 export const getLikedSongs = async () => {
     const userId = authState.user?.id;
     if (!userId) {

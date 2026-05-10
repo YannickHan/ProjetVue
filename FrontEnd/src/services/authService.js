@@ -77,7 +77,7 @@ export const getStoredUser = () => {
   }
 };
 
-// Exemple requête protégée
+// Example protected request
 export const getProfile = async () => {
   const token = getToken();
 

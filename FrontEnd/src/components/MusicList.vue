@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import Song from './Song.vue';
 
 const props = defineProps({
@@ -19,6 +19,11 @@ const emit = defineEmits(['song-play-state-change', 'like-changed']);
 
 const localSongs = ref([]);
 
+const currentTrackKey = computed(() => {
+    if (!props.currentTrack) return '';
+    return `${props.currentTrack.name || ''}::${props.currentTrack.artist || ''}::${props.currentTrack.duration || ''}::${props.currentTrack.cover || ''}`;
+});
+
 watch(
     () => props.songs,
     (newSongs) => {
@@ -35,10 +40,13 @@ const handleLikeChanged = (payload) => {
     emit('like-changed', payload);
 };
 
+const songKey = (song) => `${song.name || ''}::${song.artist || ''}::${song.duration || ''}::${song.cover || ''}`;
+const songMemoKey = (song) => song.id || song.idSong || `${song.name}-${song.artist}-${song.duration}`;
+
 const handleSongDeleted = (payload) => {
     localSongs.value = localSongs.value.filter((song) => {
         if (payload?.idSong) {
-            return (song.id ?? song.idSong) !== payload.idSong;
+            return (song.id || song.idSong) !== payload.idSong;
         }
         // For static songs with no DB id, remove by visible identity.
         return !(
@@ -52,7 +60,7 @@ const handleSongDeleted = (payload) => {
 const handleSongUpdated = (payload) => {
     const matchSong = (song) => {
         if (payload?.idSong) {
-            return (song.id ?? song.idSong) === payload.idSong;
+            return (song.id || song.idSong) === payload.idSong;
         }
         return (
             song.name === payload?.oldName &&
@@ -77,26 +85,27 @@ const handleSongUpdated = (payload) => {
 const isSongPlaying = (song) => {
     if (!props.currentTrack) return false;
 
-    return props.currentTrack.name === song.name
-        && props.currentTrack.artist === song.artist
-        && props.currentTrack.duration === song.duration
-        && props.currentTrack.cover === song.cover
-        && props.currentTrack.isPlaying;
+    return currentTrackKey.value === songKey(song) && props.currentTrack.isPlaying;
 };
 
-//cover from https://covers.musichoarders.xyz/
 
 </script>
 
 <template>
-    <div class="trending-artiste bg-black rounded-2xl sm:rounded-4xl p-3 sm:p-10 m-1 sm:m-4 text-white">
-        <h2 class="text-left font-bold text-xl sm:text-3xl">{{ name }}</h2>
+    <div class="rounded-[28px] border border-white/10 bg-black/85 p-4 m-4 text-white shadow-xl backdrop-blur-xl sm:p-6">
+        <div class="mb-4 flex items-end justify-between gap-3">
+            <div>
+                <p class="text-xs uppercase tracking-[0.3em] text-white/35">Library</p>
+                <h2 class="text-left text-xl font-semibold sm:text-3xl">{{ name }}</h2>
+            </div>
+        </div>
 
-        <section class="m-1 sm:m-5">
+        <section v-if="localSongs.length > 0" class="space-y-3">
             <Song 
                 v-for="(song, index) in localSongs" 
-                :key="song.id ?? song.idSong ?? `${song.name}-${song.artist}-${song.duration}`"
-                :id-song="song.id ?? song.idSong"
+                v-memo="[songMemoKey(song), currentTrackKey]"
+                :key="songMemoKey(song)"
+                :id-song="song.id || song.idSong"
                 :name="song.name"
                 :artist="song.artist"
                 :duration="song.duration"
@@ -109,5 +118,7 @@ const isSongPlaying = (song) => {
                 @like-changed="handleLikeChanged"
             />
         </section>
+
+        <p v-else class="text-center text-white/50">No songs available.</p>
     </div>
 </template>

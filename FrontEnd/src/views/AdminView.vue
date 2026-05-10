@@ -1,17 +1,18 @@
 <script setup>
-import { ref, computed } from 'vue';
-import AdminLeftbar from '../components/AdminLeftbar.vue';
-import Sort from '../components/Sort.vue';
-import Filter from "../components/Filter.vue";
-import AddButton from '../components/AddButton.vue';
-import SearchBar from '../components/SearchBar.vue';
-import MusicList from '../components/MusicList.vue';
-import AdminDashboard from '../components/AdminDashboard.vue';
-import ArtistList from '../components/ArtistList.vue';
-import SongsData from '../assets/songsData.json';
-import Footer from '../components/Footer.vue';
-import { logout } from "../store/auth";
-import { searchSongsByTitle } from '../store/Song';
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import AdminLeftbar from '../components/AdminLeftbar.vue'
+import Sort from '../components/Sort.vue'
+import Filter from '../components/Filter.vue'
+import AddButton from '../components/AddButton.vue'
+import SearchBar from '../components/SearchBar.vue'
+import MusicList from '../components/MusicList.vue'
+import AdminDashboard from '../components/AdminDashboard.vue'
+import ArtistList from '../components/ArtistList.vue'
+import SongsData from '../assets/songsData.json'
+import Footer from '../components/Footer.vue'
+import { logout } from '../store/auth'
+import { searchSongsByTitle } from '../store/Song'
 
 const songs = ref(SongsData);
 const searchResults = ref([]);
@@ -53,6 +54,21 @@ const currentTrack = ref({
 const handleSongPlayStateChange = (payload) => {
   currentTrack.value = payload;
 };
+
+// ----------------------------This handle the router ----------------------------
+
+const router = useRouter()
+
+const handleSelectArtist = (payload) => {
+    router.push({
+        path: '/webplayer',
+        query: {
+            view: 'artist',
+            name: payload.artist,
+            image: payload.image,
+        },
+    })
+}
 
 // ----------------------------This handle the filtering ----------------------------
 const filters = ref({
@@ -110,46 +126,121 @@ const displayedSongs = computed(() => {
   if (searchQuery.value) return searchResults.value;
   return processedSongs.value;
 });
+
+const sectionTitle = computed(() => {
+  if (activeView.value === 'dashboard') return 'Dashboard'
+  if (activeView.value === 'musicList') return 'Music catalog'
+  return 'Artists'
+})
+
+const sectionSubtitle = computed(() => {
+  if (activeView.value === 'dashboard') return 'Overview of platform activity and user requests.'
+  if (activeView.value === 'musicList') return 'Browse the song catalog and keep it up to date.'
+  return 'Browse the artist list and keep the catalog up to date.'
+})
+
+const totalSongs = computed(() => songs.value.length)
+const visibleSongs = computed(() => displayedSongs.value.length)
+const totalArtists = computed(() => {
+  const artists = new Set()
+  songs.value.forEach((song) => {
+    normalizeArtists(song.artist).forEach((artist) => artists.add(artist))
+  })
+  return artists.size
+})
 </script>
 
 <template>
-  <div>
-    <div class="grid grid-cols-1 lg:grid-cols-[0.2fr_0.8fr] grid-rows-[auto_1fr] lg:grid-rows-1 h-screen w-screen p-2 sm:p-4 gap-2 sm:gap-4">
+  <div class="relative min-h-screen w-screen overflow-hidden bg-black text-white">
+    <div class="pointer-events-none absolute inset-0 opacity-20">
+      <div class="absolute -left-24 top-10 h-72 w-72 rounded-full bg-white/5 blur-2xl"></div>
+      <div class="absolute right-0 top-1/4 h-96 w-96 rounded-full bg-white/5 blur-2xl"></div>
+      <div class="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-white/5 blur-2xl"></div>
+    </div>
+
+    <div class="relative z-10 grid h-screen w-screen grid-cols-1 gap-3 p-2 sm:p-4 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-4">
+      <aside class="h-full">
         <AdminLeftbar :active-view="activeView" @change-view="handleChangeView" />
-        <div class="bg-black text-white h-full w-full flex flex-col overflow-y-auto rounded-2xl sm:rounded-4xl">
-            <div v-if="activeView === 'dashboard'" class="text-lg sm:text-2xl font-bold">
-              <AdminDashboard/>
-              <Footer class="pb-10" />
-            </div>
-            <div v-else-if="activeView === 'musicList'" class="text-lg sm:text-2xl font-bold">
-              <div class="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 m-2 sm:m-5">
-                  <div class="flex-1 w-full">
-                    <SearchBar @search="handleSearchSongs" />
-                  </div>
-              </div>
-              <div class="flex flex-col sm:flex-row gap-2 sm:gap-0 m-2 sm:m-5">
-                <div :class="hasFilters ? 'w-34' : 'w-25'" class="relative w-full sm:w-auto">
-                  <Filter @update:filters="handleFilters" />
-                </div>
-                <Sort @sort-change="handleSortChange" type="songCatalog" />
-                <div class="ml-auto w-full sm:w-auto">
-                  <AddButton type="songCatalog"/>
-                </div>
-              </div>
-              <MusicList 
-                    name="Song Catalog"
-                    :songs="displayedSongs"
-                    :current-track="currentTrack"
-                    @song-play-state-change="handleSongPlayStateChange"
-                    class="transition-all duration-300 ease-in-out"
-                />
-              <Footer class="pb-10" />
-            </div>
-            <div v-else="activeView === 'artistList'" class="text-lg sm:text-2xl font-bold">
-                <ArtistList />
-              <Footer class="pb-10"/>
-            </div>
+      </aside>
+
+      <main class="relative flex h-full min-h-0 flex-col overflow-hidden rounded-[28px] border border-white/10 bg-black/90 shadow-xl shadow-black/40">
+        <div class="flex items-center justify-between border-b border-white/10 px-4 py-4 sm:px-6">
+          <div>
+            <p class="text-xs uppercase tracking-[0.35em] text-white/35">Phantom Waves</p>
+            <h1 class="text-xl font-semibold sm:text-3xl">Admin panel</h1>
+          </div>
+          <button @click="handleLogout" class="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white/70 transition hover:bg-white/10">
+            Logout
+          </button>
         </div>
+
+        <div class="min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-6 sm:py-6">
+          <div class="space-y-5">
+            <section class="rounded-[28px] border border-white/10 bg-black/80 p-4 shadow-lg sm:p-6">
+              <div class="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+                <div class="space-y-4">
+                  <p class="text-xs uppercase tracking-[0.3em] text-white/35">Administration</p>
+                  <h2 class="text-2xl font-semibold sm:text-4xl">{{ sectionTitle }}</h2>
+                  <p class="max-w-2xl text-sm leading-7 text-white/60 sm:text-base">
+                    {{ sectionSubtitle }}
+                  </p>
+                </div>
+
+                <div class="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+                  <div class="rounded-[24px] border border-white/10 bg-white/5 p-4">
+                    <p class="text-xs uppercase tracking-[0.3em] text-white/35">Songs</p>
+                    <p class="mt-2 text-2xl font-semibold">{{ totalSongs }}</p>
+                    <p class="mt-1 text-sm text-white/55">Total songs loaded</p>
+                  </div>
+                  <div class="rounded-[24px] border border-white/10 bg-white/5 p-4">
+                    <p class="text-xs uppercase tracking-[0.3em] text-white/35">Artists</p>
+                    <p class="mt-2 text-2xl font-semibold">{{ totalArtists }}</p>
+                    <p class="mt-1 text-sm text-white/55">Total artists loaded</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section v-if="activeView === 'dashboard'" class="rounded-[28px] border border-white/10 bg-black/80 p-4 shadow-lg sm:p-6">
+              <AdminDashboard />
+            </section>
+
+            <section v-else-if="activeView === 'musicList'" class="rounded-[28px] border border-white/10 bg-black/80 p-4 shadow-lg sm:p-6">
+              <div class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <p class="text-xs uppercase tracking-[0.3em] text-white/35">Catalog tools</p>
+                  <h2 class="text-xl font-semibold sm:text-2xl">Search and manage songs</h2>
+                </div>
+                <div class="flex gap-2">
+                  <AddButton type="songCatalog" />
+                </div>
+              </div>
+              <SearchBar @search="handleSearchSongs" />
+              <div class="flex flex-row gap-3 sm:mt-5">
+                <Sort @sort-change="handleSortChange" type="songCatalog" />
+                <Filter @update:filters="handleFilters" />
+              </div>
+              <div class="mt-5">
+                <MusicList
+                  name="Song Catalog"
+                  :songs="displayedSongs"
+                  :current-track="currentTrack"
+                  @song-play-state-change="handleSongPlayStateChange"
+                  class="transition-all duration-300 ease-in-out"
+                />
+              </div>
+            </section>
+
+            <section v-else class="rounded-[28px] border border-white/10 bg-black/80 p-4 shadow-lg sm:p-6">
+              <div class="mb-4">
+                <p class="text-xs uppercase tracking-[0.3em] text-white/35">Artists</p>
+                <h2 class="text-xl font-semibold sm:text-2xl">Artist list</h2>
+              </div>
+              <ArtistList @select-artist="handleSelectArtist"/>
+            </section>
+          </div>
+        </div>
+      </main>
     </div>
   </div>
 </template>

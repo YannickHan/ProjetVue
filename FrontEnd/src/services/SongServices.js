@@ -39,6 +39,19 @@ export const getSongs = async () => {
     return await res.json();
 };
 
+export const getGenres = async () => {
+    const res = await fetch(`${API_URL}/api/genres`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    if (!res.ok) {
+        throw new Error("Failed to fetch genres");
+    }
+    return await res.json();
+};
+
 export const getSongsByArtist = async (nameArtist) => {
     const res = await fetch(`${API_URL}/api/artists/${encodeURIComponent(nameArtist)}/songs`, {
         method: "GET",
@@ -116,6 +129,79 @@ export const getLikedSongs = async (userId) => {
     if (!res.ok) {
         throw new Error(data?.message || 'Failed to fetch liked songs');
     }
+    return data;
+};
+
+export const createPlaylist = async (playlistData) => {
+    const res = await fetch(`${API_URL}/api/playlists`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(playlistData),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.message || 'Failed to create playlist');
+    return data;
+};
+
+export const getUserPlaylists = async (userId) => {
+    const res = await fetch(`${API_URL}/api/users/${userId}/playlists`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.message || 'Failed to fetch playlists');
+    return data;
+};
+
+export const getPlaylistById = async (playlistId) => {
+    const res = await fetch(`${API_URL}/api/playlists/${playlistId}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.message || 'Failed to fetch playlist');
+    return data;
+};
+
+export const addSongToPlaylist = async (playlistId, songId) => {
+    const res = await fetch(`${API_URL}/api/playlists/${playlistId}/songs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idSong: songId }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.message || 'Failed to add song to playlist');
+    return data;
+};
+
+export const removeSongFromPlaylist = async (playlistId, songId) => {
+    const res = await fetch(`${API_URL}/api/playlists/${playlistId}/songs/${songId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.message || 'Failed to remove song from playlist');
+    return data;
+};
+
+export const updatePlaylist = async (playlistId, playlistData) => {
+    const res = await fetch(`${API_URL}/api/playlists/${playlistId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(playlistData),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.message || 'Failed to update playlist');
+    return data;
+};
+
+export const deletePlaylist = async (playlistId) => {
+    const res = await fetch(`${API_URL}/api/playlists/${playlistId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.message || 'Failed to delete playlist');
     return data;
 };
 

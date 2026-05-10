@@ -68,17 +68,12 @@ const updateStatus = (status) => {
   if (!selectedPanel.value) return
   const index = requests.value.findIndex(r => r.id === selectedPanel.value.id)
   if (index === -1) return
-
-  // Update local state optimistically
   requests.value[index].status = status
   selectedPanel.value.status = status
   statusChanged.value = status !== originalStatus.value
-
-  // Persist to database
   updateSAVStatus(selectedPanel.value.id, status)
     .catch(e => {
       alert('❌ Failed to update status: ' + (e.message || 'Unknown error'))
-      // Revert optimistic update on error
       requests.value[index].status = originalStatus.value
       selectedPanel.value.status = originalStatus.value
       statusChanged.value = false

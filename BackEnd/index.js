@@ -4,7 +4,7 @@ const { PORT } = require('./config');
 
 // Import handlers
 const { profileHandler, loginHandler, registerHandler } = require('./handlers/authHandler');
-const { getSongsHandler, getSongsByArtistHandler, searchSongsByTitleHandler, getTrendingArtistsHandler, getTrendingSongsHandler, addSongHandler, getArtistsHandler, addArtistHandler, updateArtistHandler, deleteArtistHandler, updateSongHandler, deleteSongHandler, addLikeHandler, removeLikeHandler, getUserLikesHandler } = require('./handlers/musicHandler');
+const { getSongsHandler, getSongsByArtistHandler, searchSongsByTitleHandler, getTrendingArtistsHandler, getTrendingSongsHandler, getGenresHandler, addSongHandler, getArtistsHandler, addArtistHandler, updateArtistHandler, deleteArtistHandler, updateSongHandler, deleteSongHandler, addLikeHandler, removeLikeHandler, getUserLikesHandler, createPlaylistHandler, getUserPlaylistsHandler, getPlaylistByIdHandler, addSongToPlaylistHandler, removeSongFromPlaylistHandler, updatePlaylistHandler, deletePlaylistHandler } = require('./handlers/musicHandler');
 const { addSAVHandler, getSAVHandler, updateStatusSAVHandler, updateAdminNoteSAVHandler } = require('./handlers/savHandler');
 
 const app = express();
@@ -30,6 +30,7 @@ app.get('/api/songs/search', searchSongsByTitleHandler);
 app.get('/api/artists/:nameArtist/songs', getSongsByArtistHandler);
 app.get('/api/trendingArtists', getTrendingArtistsHandler);
 app.get('/api/trendingSongs', getTrendingSongsHandler);
+app.get('/api/genres', getGenresHandler);
 app.post('/api/addSongs', addSongHandler);
 app.put('/api/songs/:idSong', updateSongHandler);
 app.delete('/api/songs/:idSong', deleteSongHandler);
@@ -41,6 +42,14 @@ app.get('/api/artists', getArtistsHandler);
 app.post('/api/artists', addArtistHandler);
 app.put('/api/artists/:idArtist', updateArtistHandler);
 app.delete('/api/artists/:idArtist', deleteArtistHandler);
+// Playlists
+app.post('/api/playlists', createPlaylistHandler);
+app.get('/api/users/:idUser/playlists', getUserPlaylistsHandler);
+app.get('/api/playlists/:idPlaylist', getPlaylistByIdHandler);
+app.post('/api/playlists/:idPlaylist/songs', addSongToPlaylistHandler);
+app.delete('/api/playlists/:idPlaylist/songs/:idSong', removeSongFromPlaylistHandler);
+app.put('/api/playlists/:idPlaylist', updatePlaylistHandler);
+app.delete('/api/playlists/:idPlaylist', deletePlaylistHandler);
 
 // SAV routes
 app.post('/api/sav', addSAVHandler);

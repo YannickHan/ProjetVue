@@ -33,13 +33,13 @@ onMounted(() => {
         <div class="overflow-hidden">
             <div class="flex animate-marquee-reverse gap-2 opacity-80 w-max">
                 <p class="text-3xl">
-                    Stream new sounds. Discover rising artists. Find hidden gems first. 
+                  Stream new sounds. Discover rising artists. Find hidden gems first. Stream new sounds. Discover rising artists. Find hidden gems first.
                 </p>
                 <p class="text-3xl">
-                    Stream new sounds. Discover rising artists. Find hidden gems first.
+                  Stream new sounds. Discover rising artists. Find hidden gems first. Stream new sounds. Discover rising artists. Find hidden gems first.
                 </p>
                 <p class="text-3xl">
-                    Stream new sounds. Discover rising artists. Find hidden gems first.
+                  Stream new sounds. Discover rising artists. Find hidden gems first. Stream new sounds. Discover rising artists. Find hidden gems first.
                 </p>
             </div>
         </div>
@@ -119,7 +119,7 @@ onMounted(() => {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 600 120' xmlns='http://www.w3.org/2000/svg'><polyline points='0,60 30,60 45,60 60,10 75,110 90,60 105,60 120,35 135,95 150,60 165,60 180,15 195,105 210,60 225,60 240,20 255,100 270,60 285,60 300,5 315,115 330,60 345,60 360,30 375,90 390,60 405,60 420,15 435,105 450,60 465,60 480,25 495,95 510,60 525,60 540,10 555,110 570,60 585,60 600,60' fill='none' stroke='green' stroke-width='2'/></svg>");
+  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 600 130' xmlns='http://www.w3.org/2000/svg'><polyline points='0,60 30,60 45,60 60,10 75,110 90,60 105,60 120,35 135,95 150,60 165,60 180,15 195,105 210,60 225,60 240,20 255,100 270,60 285,60 300,5 315,115 330,60 345,60 360,30 375,90 390,60 405,60 420,15 435,105 450,60 465,60 480,25 495,95 510,60 525,60 540,10 555,110 570,60 585,60 600,60' fill='none' stroke='green' stroke-width='2'/></svg>");
   background-repeat: repeat-x;
   background-size: auto 100%;
   background-position: 0 75px;
