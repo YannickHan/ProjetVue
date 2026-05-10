@@ -209,6 +209,6 @@ const addItem = async (name) => {
 
 ## Author
 
-Yannick SHANG QIANG HAN | TP145875
-Inès Souad BENALIA | TP145275
-Kim Lan TRAN | TP146161
+* Yannick SHANG QIANG HAN | TP145875
+* Inès Souad BENALIA | TP145275
+* Kim Lan TRAN | TP146161
