@@ -2,7 +2,7 @@
 
 ## Description
 
-**PhantomWaves** is a web development project built using **HTML, CSS, and JavaScript**, featuring a modular architecture with a Node.js backend and a dynamic frontend.
+**PhantomWaves** is a web development project built using **HTML, CSS and JavaScript**, featuring a modular architecture with a Node.js backend and a dynamic frontend.
 
 ---
 
@@ -77,9 +77,11 @@ Open `index.html` in your browser or run the development server for a better exp
 ## Features
 
 * Login system
-* Logout & page restriction
-* Web player integrated in the navbar
-
+* Web player
+* Admin Pannel
+* SAV Support
+* Quiz Activity
+  
 ---
 
 ## MySQL Integration
@@ -188,16 +190,6 @@ CREATE TABLE `artist` (
   PRIMARY KEY (`idArtist`)
 ) ENGINE=InnoDB;
 ```
-
----
-
-## Recommended Architecture
-
-For scalability and clean code:
-
-* **Models/** → Database queries / schema abstraction
-* **Routes/** → API endpoints
-* **Controllers/** → Business logic
 
 ---
 
