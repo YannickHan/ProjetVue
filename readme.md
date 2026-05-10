@@ -215,12 +215,6 @@ const addItem = async (name) => {
 
 ---
 
-## License
-
-MIT
-
----
-
 ## Author
 
 Yannick SHANG QIANG HAN | TP145875
