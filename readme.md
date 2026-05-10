@@ -1,14 +1,14 @@
-# 🌊 PhantomWaves
+# PhantomWaves
 
-## 📖 Description
+## Description
 
 **PhantomWaves** is a web development project built using **HTML, CSS, and JavaScript**, featuring a modular architecture with a Node.js backend and a dynamic frontend.
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
-### 📥 Clone the repository
+### Clone the repository
 
 ```bash
 git clone <repository-url>
@@ -17,7 +17,7 @@ cd phantomwaves
 
 ---
 
-## 📦 Installation & Launch
+## Installation & Launch
 
 ```bash
 npm run install
@@ -26,9 +26,9 @@ npm run dev
 
 ---
 
-## ⚙️ Available Commands
+## Available Commands
 
-### 🧪 Development
+### Development
 
 ```bash
 npm run install      # Install dependencies
@@ -36,20 +36,20 @@ npm run start        # Start development server
 npm run dev          # Run development mode
 ```
 
-### 🏗️ Build
+### Build
 
 ```bash
 npm run build    # Build for production
 npm run minify   # Minify assets
 ```
 
-### 🧹 Cleanup
+### Cleanup
 
 ```bash
 npm run clean    # Remove build artifacts
 ```
 
-### ✅ Testing
+### Testing
 
 ```bash
 npm test         # Run tests
@@ -58,7 +58,7 @@ npm run lint     # Lint code
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 phantomwaves/
@@ -68,21 +68,21 @@ phantomwaves/
 
 ---
 
-## 🖥️ Usage
+## Usage
 
 Open `index.html` in your browser or run the development server for a better experience.
 
 ---
 
-## ✨ Features
+## Features
 
-* 🔐 Login system
-* 🚪 Logout & page restriction
-* 🎵 Web player integrated in the navbar
+* Login system
+* Logout & page restriction
+* Web player integrated in the navbar
 
 ---
 
-## 🗄️ MySQL Integration
+## MySQL Integration
 
 ### 1. Install dependencies
 
@@ -116,10 +116,10 @@ const db = mysql.createConnection({
 
 db.connect(err => {
   if (err) {
-    console.error('❌ MySQL connection error:', err);
+    console.error('MySQL connection error:', err);
     return;
   }
-  console.log('✅ Connected to MySQL');
+  console.log('Connected to MySQL');
 });
 
 // Get all items
@@ -165,7 +165,7 @@ const updateSongHandler = async (req, res) => {
 };
 
 
-app.listen(3000, () => console.log('🚀 Server running on port 3000'));
+app.listen(3000, () => console.log('Server running on port 3000'));
 ```
 
 ---
@@ -191,7 +191,7 @@ CREATE TABLE `artist` (
 
 ---
 
-## 🏗️ Recommended Architecture
+## Recommended Architecture
 
 For scalability and clean code:
 
@@ -201,7 +201,7 @@ For scalability and clean code:
 
 ---
 
-## 🔌 Example Usage in Vue.js
+## Example Usage in Vue.js
 
 ```js
 const addItem = async (name) => {
@@ -215,13 +215,13 @@ const addItem = async (name) => {
 
 ---
 
-## 📜 License
+## License
 
 MIT
 
 ---
 
-## 👤 Author
+## Author
 
 Yannick SHANG QIANG HAN | TP145875
 Inès Souad BENALIA | TP145275
