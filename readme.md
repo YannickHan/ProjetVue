@@ -1,343 +1,255 @@
-# 🌊 PhantomWaves
+# PhantomWaves
 
-## 📖 Description
-
-**PhantomWaves** is a web development project built using **HTML, CSS and JavaScript**, featuring a modular architecture with a Node.js backend and a dynamic frontend.
+> A full-stack music streaming web application using featuring an audio player, playlist management, customer support and an admin panel.
 
 ---
 
-## Getting Started
+## Overview
 
-### Clone the repository
+**PhantomWaves** is a music streaming web application built as part of a school project. It offers a modern interface inspired by major streaming platforms (Spotify-like), including:
+
+- An integrated audio player
+- Personalized playlist management
+- User authentication (user / admin roles)
+- A full admin dashboard
+- Customer support (ticketing system)
+- A music quiz activity
+
+---
+
+## Tech Stack
+
+### Frontend
+| Technology | Version |
+|---|---|
+| Vue.js | 3.x |
+| Vue Router | 4.x |
+| Tailwind CSS | 4.x |
+| Vite | 7.x |
+
+### Backend
+| Technology | Version |
+|---|---|
+| Node.js | — |
+| Express | 5.x |
+| MySQL2 | 3.x |
+| bcrypt | 6.x |
+| dotenv | 17.x |
+| CORS | 2.x |
+
+---
+
+## Prerequisites
+
+Make sure you have the following installed:
+
+- [Node.js](https://nodejs.org/) (v18 or higher recommended)
+- [MySQL](https://www.mysql.com/) (v8 recommended)
+- npm
+
+---
+
+## Installation
+
+### 1. Clone the repository
 
 ```bash
-git clone <repository-url>
-cd phantomwaves
+git clone https://github.com/YannickHan/ProjetVue.git
+cd ProjetVue
 ```
 
----
-
-## 📦 Installation & Launch
----
-
-## Installation & Launch
+### 2. Install dependencies
 
 ```bash
 npm run install
+```
+
+> This command automatically installs both Frontend and Backend dependencies using `concurrently`.
+
+### 3. Set up the database
+
+Import the SQL schema into your MySQL server:
+
+```bash
+mysql -u root -p < BackEnd/database/mydbV2.sql
+mysql -u root -p mydb < BackEnd/database/mydbInsert.sql
+```
+
+### 4. Configure environment variables
+
+Create a `.env` file inside the `BackEnd/` folder:
+
+```env
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=mydb
+PORT=3000
+```
+
+---
+
+## Running the Project
+
+### Start both servers simultaneously
+
+```bash
 npm run dev
-npm run install
-npm run dev
+```
+
+This starts:
+- the **Express server** at `http://localhost:3000`
+- the **Vite dev server (Vue.js)** at `http://localhost:5173` (accessible on local network)
+
+### Individual commands
+
+```bash
+# Backend only
+npm run server
+
+# Frontend only
+cd FrontEnd && npm run dev
+
+# Production build (Frontend)
+cd FrontEnd && npm run build
 ```
 
 ---
-
-## ⚙️ Available Commands
-
-### 🧪 Development
-
----
-
-## Available Commands
-
-### Development
-
-```bash
-npm run install      # Install dependencies
-npm run start        # Start development server
-npm run dev          # Run development mode
-npm run install      # Install dependencies
-npm run start        # Start development server
-npm run dev          # Run development mode
-```
-
-### 🏗️ Build
-
-### Build
-
-```bash
-npm run build    # Build for production
-npm run minify   # Minify assets
-```
-
-### 🧹 Cleanup
-
-```bash
-npm run clean    # Remove build artifacts
-```
-
-### ✅ Testing
-
-### Cleanup
-
-```bash
-npm run clean    # Remove build artifacts
-```
-
-### Testing
-
-```bash
-npm test         # Run tests
-npm run lint     # Lint code
-```
-
----
----
-
-## 📁 Project Structure
 
 ## Project Structure
 
 ```
-phantomwaves/
-├── Backend/
-├── Frontend/
-├── Backend/
-├── Frontend/
+ProjetVue/
+├── BackEnd/
+│   ├── database/
+│   │   ├── mydbV2.sql          # Database schema
+│   │   └── mydbInsert.sql      # Seed data
+│   ├── handlers/
+│   │   ├── authHandler.js      # Authentication (login, register, profile)
+│   │   ├── musicHandler.js     # Songs, artists, playlists, likes
+│   │   └── savHandler.js       # Customer support (SAV)
+│   ├── public/                 # Static audio and image files
+│   ├── config.js               # Global config (port, token, SQL queries)
+│   ├── db.js                   # MySQL connection pool
+│   ├── index.js                # Express entry point & routes
+│   └── utils.js                # Utility functions
+│
+├── FrontEnd/
+│   ├── src/
+│   │   ├── views/
+│   │   │   ├── HomeView.vue        # Home page
+│   │   │   ├── WebPlayerView.vue   # Web player
+│   │   │   ├── LoginView.vue       # Login / Register
+│   │   │   ├── AdminView.vue       # Admin dashboard
+│   │   │   ├── SupportView.vue     # Customer support
+│   │   │   └── AboutView.vue       # About / Quiz
+│   │   ├── components/             # Reusable Vue components
+│   │   ├── router/                 # Vue Router configuration
+│   │   ├── services/               # API call services
+│   │   ├── store/                  # Global state management
+│   │   └── main.js                 # Vue entry point
+│   ├── index.html
+│   └── vite.config.js
+│
+└── package.json                # Root scripts (dev, install)
 ```
 
 ---
 
-## 🖥️ Usage
+## API Routes
 
-Open `index.html` in your browser or run the development server for a better experience.
+### Authentication
+
+| Method | Route | Description |
+|---|---|---|
+| `POST` | `/api/login` | User login |
+| `POST` | `/api/register` | User registration |
+| `GET` | `/api/profile` | Get logged-in user profile |
+
+### Songs
+
+| Method | Route | Description |
+|---|---|---|
+| `GET` | `/api/songs` | Get all songs |
+| `GET` | `/api/songs/search` | Search songs by title |
+| `GET` | `/api/artists/:name/songs` | Get songs by artist |
+| `GET` | `/api/trendingSongs` | Get trending songs |
+| `GET` | `/api/genres` | Get all genres |
+| `POST` | `/api/addSongs` | Add a song (admin) |
+| `PUT` | `/api/songs/:id` | Update a song (admin) |
+| `DELETE` | `/api/songs/:id` | Delete a song (admin) |
+
+### Artists
+
+| Method | Route | Description |
+|---|---|---|
+| `GET` | `/api/artists` | Get all artists |
+| `GET` | `/api/trendingArtists` | Get trending artists |
+| `POST` | `/api/artists` | Add an artist (admin) |
+| `PUT` | `/api/artists/:id` | Update an artist (admin) |
+| `DELETE` | `/api/artists/:id` | Delete an artist (admin) |
+
+### Likes
+
+| Method | Route | Description |
+|---|---|---|
+| `POST` | `/api/songs/:id/like` | Like a song |
+| `DELETE` | `/api/songs/:id/like` | Remove a like |
+| `GET` | `/api/users/:id/likes` | Get a user's liked songs |
+
+### Playlists
+
+| Method | Route | Description |
+|---|---|---|
+| `POST` | `/api/playlists` | Create a playlist |
+| `GET` | `/api/users/:id/playlists` | Get a user's playlists |
+| `GET` | `/api/playlists/:id` | Get playlist details |
+| `POST` | `/api/playlists/:id/songs` | Add a song to a playlist |
+| `DELETE` | `/api/playlists/:id/songs/:songId` | Remove a song from a playlist |
+| `PUT` | `/api/playlists/:id` | Update a playlist |
+| `DELETE` | `/api/playlists/:id` | Delete a playlist |
+
+### Customer Support (SAV)
+
+| Method | Route | Description |
+|---|---|---|
+| `POST` | `/api/sav` | Submit a support ticket |
+| `GET` | `/api/sav` | List all tickets (admin) |
+| `PUT` | `/api/sav/:id/status` | Update ticket status |
+| `PUT` | `/api/sav/:id/adminNote` | Add an admin note to a ticket |
+
+---
+
+## Database
+
+The `mydb` schema includes the following tables:
+
+- **`user`** — Users (name, email, hashed password, admin role)
+- **`artist`** — Artists (name, banners, profile picture)
+- **`song`** — Songs (title, duration, release date, genre, audio file path)
+- **`genre`** — Music genres
+- **`playlist`** — User playlists
+- **`playlisthassong`** — Playlist ↔ song association
+- **`artisthassong`** — Artist ↔ song association
+- **`sav`** — Customer support tickets
 
 ---
 
 ## Features
 
-* Login system
-* Web player
-* Admin Pannel
-* SAV Support
-* Quiz Activity
-  
----
-
-## MySQL Integration
-
-### 1. Install dependencies
-
-```bash
-cd server
-npm install mysql2
-npm install mysql2
-```
-
----
----
-
-### 2. Setup database connection
-### 2. Setup database connection
-
-Update your `server/index.js`:
-Update your `server/index.js`:
-
-```js
-```js
-const express = require('express');
-const mysql = require('mysql2');
-const mysql = require('mysql2');
-const cors = require('cors');
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-// MySQL connection
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '', // ← replace with your password
-  database: 'phantomwaves_db'
-});
-
-db.connect(err => {
-  if (err) {
-    console.error('❌ MySQL connection error:', err);
-    return;
-  }
-  console.log('✅ Connected to MySQL');
-});
-
-// Get all items
-const getTrendingSongsHandler = async (req, res) => {
-  try {
-    const [rows] = await pool.query(`
-      SELECT s.idSong AS idSong, s.titleSong, s.durationSong, s.coverSong, pathSong, a.nameArtist FROM song s
-      INNER JOIN artisthassong ahs ON ahs.song_idSong = s.idSong
-      LEFT JOIN artist a ON ahs.artist_idArtist = a.idArtist
-      WHERE highlightedSong = 1;
-    `);
-    res.json(rows);
-  } catch (error) {
-    console.error('GetTrendingSongs error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-
-// Add new item
-const updateSongHandler = async (req, res) => {
-  const { idSong } = req.params;
-  const { title, release, duration, cover, mp3Url } = req.body;
-
-  if (!title) {
-    return res.status(400).json({ success: false, message: 'Title is required' });
-  }
-
-  try {
-    const [result] = await pool.query(
-      'UPDATE Song SET titleSong = ?, releaseSong = ?, durationSong = ?, coverSong = ?, pathSong = ? WHERE idSong = ?',
-      [title, release || null, duration || null, cover || null, mp3Url || null, idSong]
-    );
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ success: false, message: 'Song not found' });
-    }
-
-    res.json({ success: true, message: 'Song updated successfully' });
-  } catch (error) {
-    console.error('UpdateSong error:', error);
-    res.status(500).json({ success: false, message: 'Server error', error: error.message });
-  }
-};
-
-// MySQL connection
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '', // ← replace with your password
-  database: 'phantomwaves_db'
-});
-
-db.connect(err => {
-  if (err) {
-    console.error('MySQL connection error:', err);
-    return;
-  }
-  console.log('Connected to MySQL');
-});
-
-// Get all items
-const getTrendingSongsHandler = async (req, res) => {
-  try {
-    const [rows] = await pool.query(`
-      SELECT s.idSong AS idSong, s.titleSong, s.durationSong, s.coverSong, pathSong, a.nameArtist FROM song s
-      INNER JOIN artisthassong ahs ON ahs.song_idSong = s.idSong
-      LEFT JOIN artist a ON ahs.artist_idArtist = a.idArtist
-      WHERE highlightedSong = 1;
-    `);
-    res.json(rows);
-  } catch (error) {
-    console.error('GetTrendingSongs error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-
-// Add new item
-const updateSongHandler = async (req, res) => {
-  const { idSong } = req.params;
-  const { title, release, duration, cover, mp3Url } = req.body;
-
-  if (!title) {
-    return res.status(400).json({ success: false, message: 'Title is required' });
-  }
-
-  try {
-    const [result] = await pool.query(
-      'UPDATE Song SET titleSong = ?, releaseSong = ?, durationSong = ?, coverSong = ?, pathSong = ? WHERE idSong = ?',
-      [title, release || null, duration || null, cover || null, mp3Url || null, idSong]
-    );
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ success: false, message: 'Song not found' });
-    }
-
-    res.json({ success: true, message: 'Song updated successfully' });
-  } catch (error) {
-    console.error('UpdateSong error:', error);
-    res.status(500).json({ success: false, message: 'Server error', error: error.message });
-  }
-};
-
-
-app.listen(3000, () => console.log('🚀 Server running on port 3000'));
-```
+- **Authentication** — Registration, login and session management with token
+- **Audio Player** — Play tracks with full controls (play, pause, next, previous)
+- **Playlists** — Create, edit, delete and manage personal playlists
+- **Admin Panel** — Full management of songs and artists
+- **Quiz** — Music quiz activity
+- **Support** — Customer ticketing system with admin follow-up
 
 ---
 
-### 3. Example Database
+## Authors
 
-Create your database and table:
-
-```sql
-CREATE DATABASE IF NOT EXISTS `mydb`;
-USE `mydb`;
-
-CREATE TABLE `artist` (
-  `idArtist` int NOT NULL AUTO_INCREMENT,
-  `nameArtist` varchar(45) NOT NULL,
-  `highlightedArtist` tinyint(1) NOT NULL,
-  `horizontalBannerArtist` varchar(255) DEFAULT NULL,
-  `verticalBannerArtist` varchar(255) DEFAULT NULL,
-  `profileArtist` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`idArtist`)
-) ENGINE=InnoDB;
-```
-
----
-
-## 🏗️ Recommended Architecture
-
-For scalability and clean code:
-
-* **Models/** → Database queries / schema abstraction
-* **Routes/** → API endpoints
-* **Controllers/** → Business logic
-
----
-
-## 🔌 Example Usage in Vue.js
----
-
-### 3. Example Database
-
-Create your database and table:
-
-```sql
-CREATE DATABASE IF NOT EXISTS `mydb`;
-USE `mydb`;
-
-CREATE TABLE `artist` (
-  `idArtist` int NOT NULL AUTO_INCREMENT,
-  `nameArtist` varchar(45) NOT NULL,
-  `highlightedArtist` tinyint(1) NOT NULL,
-  `horizontalBannerArtist` varchar(255) DEFAULT NULL,
-  `verticalBannerArtist` varchar(255) DEFAULT NULL,
-  `profileArtist` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`idArtist`)
-) ENGINE=InnoDB;
-```
-
----
-
-## Example Usage in Vue.js
-
-```js
-```js
-const addItem = async (name) => {
-  await fetch('/api/items', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name })
-    body: JSON.stringify({ name })
-  });
-};
-```
-
----
-
-## Author
-
-Yannick SHANG QIANG HAN | TP145875
-Inès Souad BENALIA | TP145275
-Kim Lan TRAN | TP146161
+| Name | ID |
+|---|---|
+| Yannick SHANG QIANG HAN | TP145875 |
+| Inès Souad BENALIA | TP145275 |
+| Kim Lan TRAN | TP146161 |
