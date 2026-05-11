@@ -522,7 +522,7 @@ onBeforeUnmount(() => {
               @click="handleOpenMenu"
               alt="Settings" 
               class="w-4 sm:w-5 h-4 sm:h-5 mx-auto cursor-pointer hover:scale-110 transition-transform duration-300">
-          <div v-if="open && authState.user?.role === 'admin' && route.path === '/'" class="absolute right-0 mt-2 w-40 sm:w-50 bg-black/60 border rounded text-white text-xs sm:text-base z-50">
+          <div v-if="open && authState.user?.role === 'admin' && route.path === '/admin'" class="absolute right-0 mt-2 w-40 sm:w-50 bg-black/60 border rounded text-white text-xs sm:text-base z-50">
             <div class="px-2 sm:px-4 py-2 cursor-pointer hover:bg-white/90 hover:text-black" @click="openEdit()">Modify parameters</div>
             <div class="px-2 sm:px-4 py-2 cursor-pointer hover:bg-white/90 hover:text-black" @click.stop="handleDeleteSong(props.idSong, props.name)">Delete song</div>
           </div>

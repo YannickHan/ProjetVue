@@ -1,10 +1,13 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import SongsData from '../assets/songsData.json';
 
 const emit = defineEmits(['update:filters']);
-
-const songs = ref(SongsData);
+const props = defineProps({
+  songs: {
+    type: Array,
+    default: () => [],
+  },
+});
 
 const isOpen = ref(false);
 const dropdownRef = ref(null);
@@ -14,9 +17,9 @@ const filters = ref({
 });
 
 const artists = computed(() => {
-  const all = songs.value
+  const all = props.songs
     .flatMap(song =>
-      song.artist
+      (song?.artist ?? song?.nameArtist ?? '')
         .replace(/ft\./gi, ',')
         .split(',')
         .map(a => a.trim())

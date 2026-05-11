@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import AdminLeftbar from '../components/AdminLeftbar.vue'
 import Sort from '../components/Sort.vue'
@@ -9,14 +9,34 @@ import SearchBar from '../components/SearchBar.vue'
 import MusicList from '../components/MusicList.vue'
 import AdminDashboard from '../components/AdminDashboard.vue'
 import ArtistList from '../components/ArtistList.vue'
-import SongsData from '../assets/songsData.json'
 import Footer from '../components/Footer.vue'
 import { logout } from '../store/auth'
-import { searchSongsByTitle } from '../store/Song'
+import { getSongs, searchSongsByTitle } from '../store/Song'
 
-const songs = ref(SongsData);
+const songs = ref([]);
 const searchResults = ref([]);
 const searchQuery = ref('');
+
+const loadSongs = async () => {
+  try {
+    const data = await getSongs();
+    songs.value = data.map(song => ({
+      id: song?.idSong ?? song?.id ?? null,
+      name: song?.name ?? song?.titleSong ?? '',
+      artist: song?.artist ?? song?.nameArtist ?? 'Unknown artist',
+      duration: song?.duration ?? song?.durationSong ?? '',
+      cover: song?.cover ?? song?.coverSong ?? '',
+      path: song?.path ?? song?.pathSong ?? '',
+    }));
+  } catch (error) {
+    console.error('Error fetching songs:', error);
+    songs.value = [];
+  }
+};
+
+onMounted(() => {
+  loadSongs();
+});
 
 const handleLogout = () => {
   logout();
@@ -218,7 +238,7 @@ const totalArtists = computed(() => {
               <SearchBar @search="handleSearchSongs" />
               <div class="flex flex-row gap-3 sm:mt-5">
                 <Sort @sort-change="handleSortChange" type="songCatalog" />
-                <Filter @update:filters="handleFilters" />
+                <Filter :songs="songs" @update:filters="handleFilters" />
               </div>
               <div class="mt-5">
                 <MusicList
